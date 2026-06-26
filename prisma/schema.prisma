@@ -1,0 +1,497 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum RegistrationStatus {
+  Pending
+  Confirmed
+}
+
+enum PaymentStatus {
+  Success
+  Failed
+  Pending
+}
+
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Student {
+  id                 Int                @id @default(autoincrement())
+  firstName          String
+  lastName           String
+  nationalId         String
+  studentCode        String?
+  academicYear       String             @default("1405-1406")
+  registrationStatus RegistrationStatus @default(Pending)
+  totalTuition       Int?
+  parentPasswordHash String?
+  parentPasswordKey  String?            // اثرانگشت یکتاسازی رمز (sha256) — برای جلوگیری از رمز تکراری بین نوآموزان
+  classId            Int?
+  schoolClass        SchoolClass?       @relation(fields: [classId], references: [id], onDelete: SetNull)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  payments           Payment[]
+  manualPayments     ManualPayment[]
+  paymentSchedules   PaymentSchedule[]
+  profile            StudentProfile?
+  messages           Message[]
+  announcementRecipients AnnouncementRecipient[]
+  tuitionContract    TuitionContract?
+  financialPlan      StudentFinancialPlan?
+
+  @@unique([nationalId, academicYear])
+  @@unique([studentCode, academicYear])
+  @@index([academicYear])
+  @@index([registrationStatus, academicYear])
+  @@index([academicYear, lastName, firstName])
+  @@index([classId])
+}
+
+model SchoolClass {
+  id           Int       @id @default(autoincrement())
+  academicYear String
+  name         String
+  teacherName  String?
+  capacity     Int?
+  sortOrder    Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  students     Student[]
+
+  @@index([academicYear, sortOrder])
+}
+
+// بلوک محتوای عمومی — «آنچه والدین باید بدانند» و «مهارت‌های فوق‌برنامه»
+model ContentBlock {
+  id        Int      @id @default(autoincrement())
+  section   String   // parentResource | extraSkill
+  title     String
+  body      String?
+  mediaUrl  String?
+  mediaType String?  // image | video | article
+  linkUrl   String?
+  isVisible Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([section, isVisible, sortOrder])
+}
+
+// آلبوم خاطرات سالانه
+model MemoryAlbum {
+  id        Int           @id @default(autoincrement())
+  year      String
+  title     String
+  coverUrl  String?
+  isVisible Boolean       @default(true)
+  sortOrder Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  photos    MemoryPhoto[]
+
+  @@index([isVisible, sortOrder])
+}
+
+model MemoryPhoto {
+  id        Int         @id @default(autoincrement())
+  albumId   Int
+  album     MemoryAlbum @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  imageUrl  String
+  caption   String?
+  sortOrder Int         @default(0)
+  createdAt DateTime    @default(now())
+
+  @@index([albumId, sortOrder])
+}
+
+model PaymentSchedule {
+  id            Int      @id @default(autoincrement())
+  studentId     Int
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear  String   @default("1405-1406")
+  amountDue     Int
+  dueDate       String   // تاریخ شمسی مثل 1404/01/15
+  dueMonth      Int      // ماه (1-12) برای فیلتر سریع
+  dueYear       Int      // سال شمسی برای فیلتر سریع
+  description   String?
+  isPaid        Boolean  @default(false)
+  // اطلاعات چک
+  checkNumber   String?  // شماره چک
+  checkDate     String?  // تاریخ چک (شمسی)
+  bankName      String?  // نام بانک
+  bankBranch    String?  // شعبه بانک
+  checkOwner    String?  // اسم صاحب اصلی روی چک
+  sayadiNumber  String?  // شماره صیادی چک
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([academicYear])
+  @@index([studentId, academicYear])
+  @@index([academicYear, dueYear, dueMonth])
+}
+
+model Payment {
+  id               Int           @id @default(autoincrement())
+  studentId        Int
+  amountPaid       Int
+  paymentDate      DateTime      @default(now())
+  academicYear     String
+  trackingId       String        @unique
+  status           PaymentStatus @default(Pending)
+  zarinpalAuthority String?      @unique
+  zarinpalRefId    String?
+  description      String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  student          Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, academicYear, status])
+  @@index([academicYear, status, paymentDate])
+}
+
+model Worksheet {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  fileUrl     String
+  fileName    String
+  mimeType    String
+  accessCode  String?
+  isVisible   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PreRegistration {
+  id           Int      @id @default(autoincrement())
+  firstName    String
+  lastName     String
+  nationalId   String?
+  phone        String
+  birthDate    String
+  gender       String
+  gradeKey     String?
+  gradeLevel   String?
+  status       String   @default("Pending")
+  academicYear String   @default("1405-1406")
+  studentId    Int?     @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([academicYear])
+  @@index([status, academicYear])
+}
+
+model GradeBirthRange {
+  id           Int      @id @default(autoincrement())
+  academicYear String
+  gradeKey     String
+  gradeLabel   String
+  birthFrom    String
+  birthTo      String
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([academicYear, gradeKey])
+  @@index([academicYear])
+}
+
+model StudentProfile {
+  id                   Int     @id @default(autoincrement())
+  studentId            Int     @unique
+  student              Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  // تب ۱ — مشخصات نوآموز
+  photoUrl             String?
+  birthCertNumber      String?
+  birthCertIssuePlace  String?
+  birthDate            String?
+  birthPlace           String?
+  gender               String?
+  idCardRow            String?
+  idCardSeries         String?
+  idCardSerial         String?
+
+  // تب ۲ — مشخصات پدر
+  fatherNationalId     String?
+  fatherBirthDate      String?
+  fatherNationality    String?
+  fatherFirstName      String?
+  fatherLastName       String?
+  fatherPhone          String?
+  fatherIdNumber       String?
+  fatherIdIssuePlace   String?
+  fatherEducation      String?
+  fatherJob            String?
+
+  // تب ۲ — مشخصات مادر
+  motherNationalId     String?
+  motherBirthDate      String?
+  motherNationality    String?
+  motherFirstName      String?
+  motherLastName       String?
+  motherPhone          String?
+  motherIdNumber       String?
+  motherIdIssuePlace   String?
+  motherEducation      String?
+  motherJob            String?
+
+  // تب ۳ — اطلاعات تکمیلی
+  housingStatus        String?
+  leftHanded           Boolean  @default(false)
+
+  // تب ۴ — آدرس و تماس
+  address              String?
+  homePhone            String?
+  postalCode           String?
+  shadPhone            String?
+  govPhone             String?
+
+  profileCompleted     Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model TuitionContract {
+  id               Int      @id @default(autoincrement())
+  studentId        Int      @unique
+  student          Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  signerRole       String
+  workshopConsent  Boolean  @default(false)
+  contractAccepted Boolean  @default(false)
+  smsConsent       Boolean  @default(false)
+  contractDate     String
+  snapshot         String
+  parentSignatureUrl String?
+  signedAt         DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model StudentFinancialPlan {
+  id             Int      @id @default(autoincrement())
+  studentId      Int      @unique
+  student        Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  readyForParent Boolean  @default(false)
+  completedAt    DateTime?
+  invoicedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  lines          ContractPaymentLine[]
+}
+
+model ContractPaymentLine {
+  id           Int      @id @default(autoincrement())
+  planId       Int
+  plan         StudentFinancialPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  sortOrder    Int      @default(0)
+  lineType     String   // cash | check
+  amount       Int
+  paymentDate  String
+  description  String?
+  checkNumber  String?
+  bankName     String?
+  bankBranch   String?
+  checkOwner   String?
+  sayadiNumber String?
+  checkKind    String?  // amanat | sarhesab
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  amanatCashRows ContractAmanatCashRow[]
+
+  @@index([planId, sortOrder])
+}
+
+model ContractAmanatCashRow {
+  id          Int      @id @default(autoincrement())
+  lineId      Int
+  line        ContractPaymentLine @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  sortOrder   Int      @default(0)
+  paymentDate String
+  amount      Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([lineId, sortOrder])
+}
+
+model ManualPayment {
+  id           Int      @id @default(autoincrement())
+  studentId    Int
+  academicYear String   @default("1405-1406")
+  amountPaid   Int
+  paymentDate  DateTime
+  description  String?
+  // اطلاعات چک (اختیاری)
+  checkNumber  String?
+  checkDate    String?
+  bankName     String?
+  bankBranch   String?
+  checkOwner   String?
+  sayadiNumber String?
+  createdAt    DateTime @default(now())
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, paymentDate])
+  @@index([academicYear])
+  @@index([studentId, academicYear, paymentDate])
+}
+
+model InteractiveCode {
+  id         Int      @id @default(autoincrement())
+  slug       String   @unique
+  title      String
+  accessCode String?
+  isVisible  Boolean  @default(false)
+  updatedAt  DateTime @updatedAt
+}
+
+model SpotDifferenceGame {
+  id          Int                   @id @default(autoincrement())
+  slug        String                @unique
+  title       String
+  description String                @default("")
+  isVisible   Boolean               @default(false)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  stages      SpotDifferenceStage[]
+}
+
+model SpotDifferenceStage {
+  id         Int                  @id @default(autoincrement())
+  gameId     Int
+  sortOrder  Int                  @default(0)
+  title      String               @default("")
+  imageLeft  String
+  imageRight String
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  game       SpotDifferenceGame   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  spots      SpotDifferenceSpot[]
+
+  @@index([gameId])
+}
+
+model SpotDifferenceSpot {
+  id        Int                 @id @default(autoincrement())
+  stageId   Int
+  sortOrder Int                 @default(0)
+  centerX   Float
+  centerY   Float
+  radius    Float               @default(0.07)
+  stage     SpotDifferenceStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+
+  @@index([stageId])
+}
+
+model MatchingGame {
+  id          Int             @id @default(autoincrement())
+  slug        String          @unique
+  title       String
+  description String          @default("")
+  isVisible   Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  stages      MatchingStage[]
+}
+
+model MatchingStage {
+  id        Int            @id @default(autoincrement())
+  gameId    Int
+  sortOrder Int            @default(0)
+  title     String         @default("")
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  game      MatchingGame   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  pairs     MatchingPair[]
+
+  @@index([gameId])
+}
+
+model MatchingPair {
+  id        Int           @id @default(autoincrement())
+  stageId   Int
+  sortOrder Int           @default(0)
+  imageA    String
+  imageB    String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  stage     MatchingStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+
+  @@index([stageId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  name      String
+  text      String
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([approved, createdAt])
+}
+
+model Announcement {
+  id         Int                     @id @default(autoincrement())
+  text       String
+  isActive   Boolean                 @default(true)
+  scope      String                  @default("public") // public | private
+  createdAt  DateTime                @default(now())
+  updatedAt  DateTime                @updatedAt
+  recipients AnnouncementRecipient[]
+
+  @@index([scope, isActive])
+}
+
+model AnnouncementRecipient {
+  announcementId Int
+  studentId      Int
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  student        Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([announcementId, studentId])
+  @@index([studentId])
+}
+
+model Message {
+  id             Int      @id @default(autoincrement())
+  subject        String
+  body           String
+  attachmentUrl  String?
+  attachmentName String?
+  toStudentId    Int?
+  student        Student? @relation(fields: [toStudentId], references: [id], onDelete: Cascade)
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  @@index([toStudentId, isRead, createdAt])
+}
+
+model LoginAttempt {
+  id        Int      @id @default(autoincrement())
+  ip        String
+  role      String
+  createdAt DateTime @default(now())
+
+  @@index([ip, role, createdAt])
+}
+
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

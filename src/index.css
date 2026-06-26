@@ -1,0 +1,64 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-vazir: 'Vazirmatn', system-ui, sans-serif;
+  --color-pink-soft: #ffe8f3;
+  --color-pink: #ff8ec4;
+  --color-pink-deep: #f062a6;
+  --color-navy: #1e3a6e;
+  --color-navy-dark: #152a52;
+  --color-navy-light: #3d5a9a;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply m-0 min-h-svh bg-gradient-to-br from-pink-soft via-white to-pink-soft/60 font-vazir text-navy antialiased;
+  }
+
+  #root {
+    @apply min-h-svh;
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 5s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float 5s ease-in-out 1.2s infinite;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.hero-swiper .swiper-pagination-bullet {
+  @apply bg-white/60 opacity-100;
+}
+
+.hero-swiper .swiper-pagination-bullet-active {
+  @apply w-6 rounded-full bg-pink;
+}
+
+.portrait-photo {
+  image-rendering: -webkit-optimize-contrast;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.portrait-frame {
+  contain: layout style paint;
+}
