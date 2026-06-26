@@ -19,6 +19,9 @@ export async function POST(request) {
     const url = await saveUploadedImage(file, {
       uploadDir: 'uploads/contract/parents',
       filename: `parent_${studentId}`,
+      maxWidth: 1200,
+      maxHeight: 800,
+      quality: 88,
     })
 
     return Response.json({ ok: true, parentSignatureUrl: url })

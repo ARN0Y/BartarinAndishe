@@ -1,10 +1,9 @@
 import { prisma } from '@/lib/prisma'
 import { AppError } from '@/lib/errors'
-import { writeFile, mkdir } from 'fs/promises'
+import { saveUploadedImage } from '@/lib/uploadImage'
 import path from 'path'
 
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads', 'spot-difference')
-const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 const stageInclude = {
   spots: { orderBy: { sortOrder: 'asc' } },
@@ -77,20 +76,15 @@ async function saveStageImage(file, slug, stageOrder, side) {
   if (!file || typeof file === 'string') {
     throw new AppError(400, `تصویر ${side === 'left' ? 'چپ' : 'راست'} الزامی است.`)
   }
-  if (!IMAGE_TYPES.includes(file.type)) {
-    throw new AppError(400, 'فرمت تصویر مجاز نیست. (JPG, PNG, WEBP)')
-  }
-  if (file.size > 8 * 1024 * 1024) {
-    throw new AppError(400, 'حداکثر حجم هر تصویر ۸ مگابایت است.')
-  }
 
-  const dir = path.join(UPLOAD_DIR, slug, `stage-${stageOrder + 1}`)
-  await mkdir(dir, { recursive: true })
-  const ext = path.extname(file.name) || '.png'
-  const safeName = `${side}${ext}`
-  const buffer = Buffer.from(await file.arrayBuffer())
-  await writeFile(path.join(dir, safeName), buffer)
-  return `/uploads/spot-difference/${slug}/stage-${stageOrder + 1}/${safeName}`
+  return saveUploadedImage(file, {
+    uploadDir: `uploads/spot-difference/${slug}/stage-${stageOrder + 1}`,
+    filename: side,
+    maxSize: 8 * 1024 * 1024,
+    maxWidth: 1800,
+    maxHeight: 1800,
+    quality: 86,
+  })
 }
 
 async function removeGameFiles(slug) {

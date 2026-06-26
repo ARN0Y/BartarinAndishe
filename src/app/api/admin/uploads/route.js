@@ -17,7 +17,13 @@ export async function POST(request) {
     }
 
     const filename = `${folder}-${Date.now()}-${Math.floor(Math.random() * 1e9)}`
-    const url = await saveUploadedImage(file, { uploadDir: `uploads/${folder}`, filename })
+    const url = await saveUploadedImage(file, {
+      uploadDir: `uploads/${folder}`,
+      filename,
+      maxWidth: 1600,
+      maxHeight: 1600,
+      quality: 82,
+    })
     return Response.json({ ok: true, url })
   } catch (error) {
     return jsonError(error, 'خطا در آپلود تصویر')

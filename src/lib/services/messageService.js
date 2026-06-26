@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { AppError } from '@/lib/errors'
+import { saveUploadedImage } from '@/lib/uploadImage'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
@@ -20,6 +21,7 @@ const ALLOWED_TYPES = [
 ]
 
 const MAX_SIZE = 10 * 1024 * 1024
+const IMAGE_MIME_PREFIX = 'image/'
 
 const EXT_MIME = {
   '.pdf': 'application/pdf',
@@ -70,9 +72,24 @@ async function saveAttachment(file) {
     throw new AppError(400, 'حداکثر حجم فایل ضمیمه ۱۰ مگابایت است.')
   }
 
+  const baseName = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  if (mimeType.startsWith(IMAGE_MIME_PREFIX)) {
+    return {
+      attachmentUrl: await saveUploadedImage(file, {
+        uploadDir: 'uploads/messages',
+        filename: baseName,
+        maxSize: MAX_SIZE,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        quality: 82,
+      }),
+      attachmentName: file.name,
+    }
+  }
+
   await mkdir(UPLOAD_DIR, { recursive: true })
   const ext = path.extname(file.name) || '.bin'
-  const safeName = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`
+  const safeName = `${baseName}${ext}`
   const buffer = Buffer.from(await file.arrayBuffer())
   await writeFile(path.join(UPLOAD_DIR, safeName), buffer)
 

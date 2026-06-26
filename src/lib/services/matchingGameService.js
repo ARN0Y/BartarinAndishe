@@ -1,10 +1,9 @@
 import { prisma } from '@/lib/prisma'
 import { AppError } from '@/lib/errors'
-import { writeFile, mkdir } from 'fs/promises'
+import { saveUploadedImage } from '@/lib/uploadImage'
 import path from 'path'
 
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads', 'matching-games')
-const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 const pairInclude = {
   pairs: { orderBy: { sortOrder: 'asc' } },
@@ -74,20 +73,15 @@ async function savePairImage(file, slug, stageOrder, pairOrder, side) {
   if (!file || typeof file === 'string') {
     throw new AppError(400, `تصویر ${side === 'a' ? 'اول' : 'دوم'} الزامی است.`)
   }
-  if (!IMAGE_TYPES.includes(file.type)) {
-    throw new AppError(400, 'فرمت تصویر مجاز نیست. (JPG, PNG, WEBP)')
-  }
-  if (file.size > 8 * 1024 * 1024) {
-    throw new AppError(400, 'حداکثر حجم هر تصویر ۸ مگابایت است.')
-  }
 
-  const dir = path.join(UPLOAD_DIR, slug, `stage-${stageOrder + 1}`, `pair-${pairOrder + 1}`)
-  await mkdir(dir, { recursive: true })
-  const ext = path.extname(file.name) || '.png'
-  const safeName = `${side}${ext}`
-  const buffer = Buffer.from(await file.arrayBuffer())
-  await writeFile(path.join(dir, safeName), buffer)
-  return `/uploads/matching-games/${slug}/stage-${stageOrder + 1}/pair-${pairOrder + 1}/${safeName}`
+  return saveUploadedImage(file, {
+    uploadDir: `uploads/matching-games/${slug}/stage-${stageOrder + 1}/pair-${pairOrder + 1}`,
+    filename: side,
+    maxSize: 8 * 1024 * 1024,
+    maxWidth: 1200,
+    maxHeight: 1200,
+    quality: 84,
+  })
 }
 
 async function removeGameFiles(slug) {

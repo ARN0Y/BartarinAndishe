@@ -54,6 +54,9 @@ export async function POST(request) {
     const url = await saveUploadedImage(file, {
       uploadDir: 'uploads/contract',
       filename: filenameMap[assetType],
+      maxWidth: 1200,
+      maxHeight: 800,
+      quality: 88,
     })
 
     const fieldMap = {
