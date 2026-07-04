@@ -42,6 +42,15 @@ function normalizeDevHost(request) {
   return NextResponse.redirect(url)
 }
 
+// پشت nginx مقدار request.url ممکن است localhost:3000 باشد؛ مبدأ واقعی را از هدرها می‌سازیم
+function siteBase(request) {
+  const proto = request.headers.get('x-forwarded-proto')
+    || request.nextUrl.protocol.replace(':', '')
+    || 'http'
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host')
+  return host ? `${proto}://${host}` : request.url
+}
+
 export async function middleware(request) {
   const { pathname } = request.nextUrl
   const hostRedirect = normalizeDevHost(request)
@@ -50,7 +59,7 @@ export async function middleware(request) {
   // ─── Redirect قدیمی /payment/admin به /admin ─────────────────
   if (pathname.startsWith('/payment/admin')) {
     const newPath = pathname.replace('/payment/admin', '/admin')
-    return NextResponse.redirect(new URL(newPath, request.url))
+    return NextResponse.redirect(new URL(newPath, siteBase(request)))
   }
 
   // ─── /admin → ورود یا داشبورد ─────────────────────────────────
@@ -58,9 +67,9 @@ export async function middleware(request) {
     const token = request.cookies.get(SESSION_COOKIES.admin)?.value
     const session = await verify(token)
     if (session?.role === 'admin') {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+      return NextResponse.redirect(new URL('/admin/dashboard', siteBase(request)))
     }
-    return NextResponse.redirect(new URL('/admin/login', request.url))
+    return NextResponse.redirect(new URL('/admin/login', siteBase(request)))
   }
 
   // ─── محافظت از /admin/* ───────────────────────────────────────
@@ -68,7 +77,7 @@ export async function middleware(request) {
     const token = request.cookies.get(SESSION_COOKIES.admin)?.value
     const session = await verify(token)
     if (!session || session.role !== 'admin') {
-      return NextResponse.redirect(new URL('/admin/login', request.url))
+      return NextResponse.redirect(new URL('/admin/login', siteBase(request)))
     }
   }
 
@@ -77,7 +86,7 @@ export async function middleware(request) {
     const token = request.cookies.get(SESSION_COOKIES.admin)?.value
     const session = await verify(token)
     if (session?.role === 'admin') {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+      return NextResponse.redirect(new URL('/admin/dashboard', siteBase(request)))
     }
   }
 
@@ -86,9 +95,9 @@ export async function middleware(request) {
     const token = request.cookies.get(SESSION_COOKIES.parent)?.value
     const session = await verify(token)
     if (session?.role === 'parent') {
-      return NextResponse.redirect(new URL('/payment/parent/dashboard?tab=profile', request.url))
+      return NextResponse.redirect(new URL('/payment/parent/dashboard?tab=profile', siteBase(request)))
     }
-    return NextResponse.redirect(new URL('/payment/parent/login', request.url))
+    return NextResponse.redirect(new URL('/payment/parent/login', siteBase(request)))
   }
 
   // ─── ریدایرکت اگر والد لاگین است و به login می‌رود ──────────
@@ -96,7 +105,7 @@ export async function middleware(request) {
     const token = request.cookies.get(SESSION_COOKIES.parent)?.value
     const session = await verify(token)
     if (session?.role === 'parent') {
-      return NextResponse.redirect(new URL('/payment/parent/dashboard?tab=profile', request.url))
+      return NextResponse.redirect(new URL('/payment/parent/dashboard?tab=profile', siteBase(request)))
     }
   }
 
@@ -114,7 +123,7 @@ export async function middleware(request) {
     const token = request.cookies.get(SESSION_COOKIES.parent)?.value
     const session = await verify(token)
     if (!session || session.role !== 'parent') {
-      return NextResponse.redirect(new URL('/payment/parent/login', request.url))
+      return NextResponse.redirect(new URL('/payment/parent/login', siteBase(request)))
     }
   }
 
