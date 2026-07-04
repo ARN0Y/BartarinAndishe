@@ -1,8 +1,26 @@
 import { prisma } from '@/lib/prisma'
 import { navItems } from '@/data/navItems'
 import { contentGallerySections } from '@/data/contentGalleries'
+import { heroGalleryStrip } from '@/data/heroSlides'
 
 export const SITE_LAYOUT_KEY = 'siteLayout'
+
+function sanitizeStrip(raw, prefix = 's') {
+  if (!Array.isArray(raw)) return null
+  return raw
+    .map((it, i) => {
+      const type = it?.type === 'video' ? 'video' : 'image'
+      const entry = {
+        id: String(it?.id || `${prefix}-${i}`),
+        type,
+        src: String(it?.src || '').trim(),
+        caption: String(it?.caption || '').trim(),
+      }
+      if (type === 'video' && it?.poster) entry.poster = String(it.poster).trim()
+      return entry
+    })
+    .filter((it) => it.src)
+}
 
 // گالری‌های قابل‌ویرایش (تصاویر + برچسب‌ها) — ترتیب همان ترتیب نمایش در صفحه
 export const GALLERY_IDS = ['edu-activities', 'multiple-intelligence', 'celebrations', 'extra-skills']
@@ -45,6 +63,7 @@ export function getSiteLayoutDefaults() {
     header: { ...HEADER_DEFAULT },
     nav: Object.fromEntries(navItems.map((n) => [n.id, n.label])),
     galleries: defaultGalleries(),
+    heroStrip: heroGalleryStrip.map((item) => ({ ...item })),
   }
 }
 
@@ -91,7 +110,11 @@ export async function getMergedSiteLayout() {
     }
   }
 
-  return { header, nav, galleries }
+  const heroStrip = Array.isArray(ov.heroStrip) && ov.heroStrip.length
+    ? ov.heroStrip
+    : defaults.heroStrip
+
+  return { header, nav, galleries, heroStrip }
 }
 
 /** برای ادیتور پنل: هم پیش‌فرض‌ها هم مقدار فعلی */
@@ -130,23 +153,13 @@ export async function saveSiteLayout(payload = {}) {
         badge: String(g.badge || '').trim(),
         title: String(g.title || '').trim(),
         subtitle: String(g.subtitle || '').trim(),
-        strip: Array.isArray(g.strip)
-          ? g.strip
-              .map((it, i) => {
-                const type = it?.type === 'video' ? 'video' : 'image'
-                const entry = {
-                  id: String(it?.id || `${id}-${i}`),
-                  type,
-                  src: String(it?.src || '').trim(),
-                  caption: String(it?.caption || '').trim(),
-                }
-                if (type === 'video' && it?.poster) entry.poster = String(it.poster).trim()
-                return entry
-              })
-              .filter((it) => it.src)
-          : [],
+        strip: sanitizeStrip(g.strip, id) || [],
       }
     }
+  }
+
+  if (payload.heroStrip !== undefined) {
+    clean.heroStrip = sanitizeStrip(payload.heroStrip, 'hero') || []
   }
 
   await prisma.appSetting.upsert({

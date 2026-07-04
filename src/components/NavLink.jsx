@@ -18,9 +18,8 @@ export default function NavLink({ item, onClick, activeId, index = 0 }) {
   const isSection = item.section
   const href = item.href
 
-  const isActive = item.id === 'pre-register'
-    ? pathname === '/pre-register'
-    : activeId === item.id
+  // لینک‌های لنگری (#) بر اساس اسکرول فعال می‌شوند؛ لینک‌های صفحه‌ای بر اساس مسیر
+  const isActive = isSection ? activeId === item.id : pathname === href
 
   const handleClick = (e) => {
     onClick?.(e)

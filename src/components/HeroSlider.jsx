@@ -12,9 +12,10 @@ import { ArrowLeft, Phone, Sparkles } from 'lucide-react'
 import 'swiper/css'
 import 'swiper/css/free-mode'
 
-export default function HeroSlider() {
+export default function HeroSlider({ strip = null }) {
   const swiperRef = useRef(null)
   const [lightboxSrc, setLightboxSrc] = useState(null)
+  const items = strip && strip.length ? strip : heroGalleryStrip
 
   const handleVideoPlay = useCallback(() => {
     swiperRef.current?.swiper?.autoplay?.stop()
@@ -39,7 +40,7 @@ export default function HeroSlider() {
 
   const galleryConfig = {
     modules: [Autoplay, FreeMode],
-    loop: heroGalleryStrip.length > 3,
+    loop: items.length > 3,
     speed: 900,
     grabCursor: true,
     freeMode: { enabled: true, momentum: true, sticky: false },
@@ -94,7 +95,7 @@ export default function HeroSlider() {
           <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-card to-transparent sm:w-14" aria-hidden />
 
           <Swiper ref={swiperRef} {...galleryConfig} className="!overflow-visible !px-2 !pb-2">
-            {heroGalleryStrip.map((item, index) => (
+            {items.map((item, index) => (
               <SwiperSlide key={item.id} className="!w-auto py-3">
                 <HeroGalleryCard
                   item={item}
@@ -114,15 +115,15 @@ export default function HeroSlider() {
             {siteContact.gradeLevels}
           </span>
           <span className="text-[11px] text-muted-foreground">
-            {heroGalleryStrip.length.toLocaleString('fa-IR')} قاب منتخب
+            {items.length.toLocaleString('fa-IR')} قاب منتخب
           </span>
         </div>
       </div>
 
       {lightboxSrc && (
         <ImageLightbox
-          images={heroGalleryStrip.filter(i => i.type !== 'video').map(i => i.src)}
-          initialIndex={Math.max(0, heroGalleryStrip.filter(i => i.type !== 'video').map(i => i.src).indexOf(lightboxSrc))}
+          images={items.filter(i => i.type !== 'video').map(i => i.src)}
+          initialIndex={Math.max(0, items.filter(i => i.type !== 'video').map(i => i.src).indexOf(lightboxSrc))}
           onClose={() => setLightboxSrc(null)}
         />
       )}

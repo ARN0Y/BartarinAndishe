@@ -73,6 +73,15 @@ export async function addPhoto(albumId, data) {
   })
 }
 
+export async function updatePhoto(photoId, data) {
+  const photo = await prisma.memoryPhoto.findUnique({ where: { id: photoId } })
+  if (!photo) throw new AppError(404, 'عکس یافت نشد.')
+  const patch = {}
+  if (data.caption !== undefined) patch.caption = String(data.caption || '').trim() || null
+  if (!Object.keys(patch).length) throw new AppError(422, 'فیلدی برای ویرایش ارسال نشده.')
+  return prisma.memoryPhoto.update({ where: { id: photoId }, data: patch })
+}
+
 export async function deletePhoto(photoId) {
   const photo = await prisma.memoryPhoto.findUnique({ where: { id: photoId } })
   if (!photo) throw new AppError(404, 'عکس یافت نشد.')

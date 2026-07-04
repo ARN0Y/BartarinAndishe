@@ -72,6 +72,7 @@ export default function AdminSiteLayoutPanel() {
   const [header, setHeader] = useState({ brandTop: '', brandMain: '', logoUrl: '' })
   const [nav, setNav] = useState({})
   const [galleries, setGalleries] = useState({})
+  const [heroStrip, setHeroStrip] = useState([])
 
   async function load() {
     setLoading(true)
@@ -85,6 +86,7 @@ export default function AdminSiteLayoutPanel() {
       setHeader({ ...json.current.header })
       setNav({ ...json.current.nav })
       setGalleries(JSON.parse(JSON.stringify(json.current.galleries || {})))
+      setHeroStrip(JSON.parse(JSON.stringify(json.current.heroStrip || [])))
     } catch (err) {
       setError(err.message)
     } finally {
@@ -101,7 +103,7 @@ export default function AdminSiteLayoutPanel() {
       const res = await fetch('/api/admin/site-layout', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ header, nav, galleries }),
+        body: JSON.stringify({ header, nav, galleries, heroStrip }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.message || 'خطا در ذخیره')
@@ -140,6 +142,11 @@ export default function AdminSiteLayoutPanel() {
         </div>
         <div className="mt-4">
           <AdminImageUpload label="لوگو (خالی = لوگوی پیش‌فرض)" value={header.logoUrl && header.logoUrl !== defaults.header.logoUrl ? header.logoUrl : ''} folder="cms" onChange={(url) => setHeader((v) => ({ ...v, logoUrl: url || defaults.header.logoUrl }))} />
+        </div>
+        <div className="mt-5 border-t border-border pt-4">
+          <p className="mb-1 text-sm font-bold text-foreground">عکس‌های هدر (اسلایدر بالای صفحهٔ اصلی)</p>
+          <p className="mb-3 text-[11px] text-muted-foreground">قاب‌های تصویری/ویدیویی بالای صفحهٔ اصلی — با لیبل (زیرنویس) و امکان افزودن یا حذف.</p>
+          <StripEditor items={heroStrip} onChange={setHeroStrip} />
         </div>
       </AdminPanel>
 

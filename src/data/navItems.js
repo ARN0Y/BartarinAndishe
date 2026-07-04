@@ -10,6 +10,6 @@ export const navItems = [
   { id: 'extra-skills', label: 'مهارت‌های فوق‌برنامه', href: '/#extra-skills', section: true, iconName: 'Sparkles' },
   { id: 'pre-register', label: 'پیش ثبت‌نام', href: '/pre-register', iconName: 'FileEdit' },
   { id: 'register-info', label: 'ثبت‌نام و تماس', href: '/#register-info', section: true, iconName: 'ClipboardList' },
-  { id: 'parent-resources', label: 'آنچه والدین باید بدانند', href: '/#parent-resources', section: true, iconName: 'BookOpenCheck', cms: 'parentResources' },
-  { id: 'memories', label: 'آلبوم خاطرات سالانه', href: '/#memories', section: true, iconName: 'Images', cms: 'memoryAlbums' },
+  { id: 'parent-resources', label: 'آنچه والدین باید بدانند', href: '/parent-resources', iconName: 'BookOpenCheck' },
+  { id: 'memories', label: 'آلبوم خاطرات سالانه', href: '/memories', iconName: 'Images' },
 ]

@@ -31,6 +31,7 @@ export default function HomePage({ sessionData, announcements = [], cms = {}, si
   const navLabels = siteLayout?.nav || {}
   const header = siteLayout?.header || null
   const galleries = siteLayout?.galleries || null
+  const heroStrip = siteLayout?.heroStrip || null
 
   // ساخت فهرست ناوبری با ترتیب ثابت؛ آیتم‌های CMS فقط با وجود محتوا، و برچسب‌ها از پنل
   const navItems = navItemsDefault
@@ -57,7 +58,7 @@ export default function HomePage({ sessionData, announcements = [], cms = {}, si
 
           <main className="min-w-0 flex-1">
             <section className="px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
-              <HeroSlider />
+              <HeroSlider strip={heroStrip} />
             </section>
 
             <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
