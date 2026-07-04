@@ -8,8 +8,8 @@ import { tenureLabel } from '@/lib/tenure'
 export default function FounderSection({ info: infoOverride }) {
   const info = infoOverride || founderInfo
   const yearsExperience = info.yearsExperience?.trim() ? info.yearsExperience : tenureLabel('founder')
-  const education = (info.education || []).slice(0, 2)
-  const highlights = (info.highlights || []).slice(0, 3)
+  const education = info.education || []
+  const highlights = info.highlights || []
 
   return (
     <SectionShell

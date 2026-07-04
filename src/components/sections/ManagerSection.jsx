@@ -9,8 +9,8 @@ import { Clock3 } from 'lucide-react'
 export default function ManagerSection({ info: infoOverride }) {
   const info = infoOverride || managerInfo
   const yearsExperience = info.yearsExperience?.trim() ? info.yearsExperience : tenureLabel('manager')
-  const education = (info.education || []).slice(0, 2)
-  const responsibilities = (info.responsibilities || []).slice(0, 3)
+  const education = info.education || []
+  const responsibilities = info.responsibilities || []
 
   return (
     <SectionShell
