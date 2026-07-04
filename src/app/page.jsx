@@ -3,6 +3,7 @@ import { getActiveAnnouncements } from '@/lib/services/announcementService'
 import { getMergedHomeContent } from '@/lib/services/homeContentService'
 import { listContentBlocks } from '@/lib/services/contentService'
 import { listAlbums } from '@/lib/services/memoryAlbumService'
+import { getMergedSiteLayout } from '@/lib/services/siteLayoutService'
 import HomePage from '../components/HomePage'
 
 export const dynamic = 'force-dynamic'
@@ -21,12 +22,21 @@ async function loadCms() {
   }
 }
 
+async function loadSiteLayout() {
+  try {
+    return await getMergedSiteLayout()
+  } catch {
+    return null
+  }
+}
+
 export default async function Page() {
-  const [adminSession, parentSession, announcements, cms] = await Promise.all([
+  const [adminSession, parentSession, announcements, cms, siteLayout] = await Promise.all([
     getSession('admin'),
     getSession('parent'),
     getActiveAnnouncements(),
     loadCms(),
+    loadSiteLayout(),
   ])
 
   const sessionData = adminSession
@@ -35,5 +45,5 @@ export default async function Page() {
     ? { type: 'parent', dashUrl: '/payment/parent/dashboard', label: 'داشبورد اولیا' }
     : null
 
-  return <HomePage sessionData={sessionData} announcements={announcements} cms={cms} />
+  return <HomePage sessionData={sessionData} announcements={announcements} cms={cms} siteLayout={siteLayout} />
 }

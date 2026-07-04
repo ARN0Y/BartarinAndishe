@@ -12,6 +12,7 @@ import AnnouncementBanner from './AnnouncementBanner'
 import KidDecorations from './KidDecorations'
 import { MusicProvider } from './MusicProvider'
 import { ThemeToggle } from './ui/theme-toggle'
+import { navItems as navItemsDefault } from '../data/navItems'
 
 function scrollToHash(hash) {
   if (!hash) return
@@ -24,14 +25,17 @@ function scrollToHash(hash) {
   }
 }
 
-export default function HomePage({ sessionData, announcements = [], cms = {} }) {
+export default function HomePage({ sessionData, announcements = [], cms = {}, siteLayout = null }) {
   const pathname = usePathname()
 
-  const extraNavItems = [
-    cms.parentResources?.length ? { id: 'parent-resources', label: 'آنچه والدین باید بدانند', href: '/#parent-resources', section: true, iconName: 'BookOpenCheck' } : null,
-    cms.extraSkills?.length ? { id: 'extra-skills', label: 'مهارت‌های فوق‌برنامه', href: '/#extra-skills', section: true, iconName: 'Sparkles' } : null,
-    cms.memoryAlbums?.length ? { id: 'memories', label: 'آلبوم خاطرات سالانه', href: '/#memories', section: true, iconName: 'Images' } : null,
-  ].filter(Boolean)
+  const navLabels = siteLayout?.nav || {}
+  const header = siteLayout?.header || null
+  const galleries = siteLayout?.galleries || null
+
+  // ساخت فهرست ناوبری با ترتیب ثابت؛ آیتم‌های CMS فقط با وجود محتوا، و برچسب‌ها از پنل
+  const navItems = navItemsDefault
+    .filter((item) => !item.cms || (cms[item.cms]?.length > 0))
+    .map((item) => ({ ...item, label: navLabels[item.id] || item.label }))
 
   useEffect(() => {
     if (pathname !== '/') return
@@ -46,10 +50,10 @@ export default function HomePage({ sessionData, announcements = [], cms = {} }) 
       <div className="homepage-gradient relative flex min-h-svh flex-col">
         <KidDecorations />
         <AnnouncementBanner initialAnnouncements={announcements} />
-        <SiteHeader sessionData={sessionData} />
+        <SiteHeader sessionData={sessionData} header={header} />
 
         <div className="relative z-10 flex flex-1">
-          <Sidebar sessionData={sessionData} hasAnnouncements={announcements.length > 0} extraNavItems={extraNavItems} />
+          <Sidebar sessionData={sessionData} hasAnnouncements={announcements.length > 0} navItems={navItems} header={header} />
 
           <main className="min-w-0 flex-1">
             <section className="px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
@@ -57,7 +61,7 @@ export default function HomePage({ sessionData, announcements = [], cms = {} }) 
             </section>
 
             <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
-              <HomeSections cms={cms} />
+              <HomeSections cms={cms} galleries={galleries} />
             </div>
           </main>
         </div>

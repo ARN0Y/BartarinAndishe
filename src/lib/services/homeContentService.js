@@ -3,12 +3,13 @@ import { managerInfo, founderInfo } from '@/data/homeSections'
 
 export const HOME_CONTENT_KEY = 'homeContent'
 
-// فیلدهای متنی قابل‌ویرایش
+// فیلدهای متنی قابل‌ویرایش (ترتیب = ترتیب نمایش در ادیتور)
+// image: عکس (آپلود) | yearsExperience: خالی = محاسبهٔ خودکار سابقه
 const TEXT_FIELDS = {
-  manager: ['name', 'role', 'shortIntro', 'phone', 'instagram', 'philosophy', 'workingHours'],
-  founder: ['name', 'role', 'shortIntro', 'phone', 'instagram', 'quote', 'messageShort'],
+  manager: ['image', 'fullName', 'honorific', 'role', 'yearsExperience', 'shortIntro', 'philosophy', 'workingHours', 'phone', 'instagram'],
+  founder: ['image', 'fullName', 'honorific', 'role', 'yearsExperience', 'shortIntro', 'quote', 'messageTitle', 'messageShort', 'phone', 'instagram'],
 }
-// فیلدهای فهرستی (آرایه‌ای از رشته) قابل‌ویرایش
+// فیلدهای فهرستی (آرایه‌ای از رشته) قابل‌ویرایش — با افزودن/حذف
 const LIST_FIELDS = {
   manager: ['education', 'responsibilities'],
   founder: ['education', 'highlights'],

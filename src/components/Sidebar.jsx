@@ -2,16 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { navItems } from '../data/navItems'
+import { navItems as navItemsDefault } from '../data/navItems'
 import NavLink, { useSidebarActiveId } from './NavLink'
 import ParentLoginButton from './ParentLoginButton'
 import { Menu, X, User, LogIn } from 'lucide-react'
 import { ScrollArea } from './ui/scroll-area'
 import { Separator } from './ui/separator'
 
-function SidebarContent({ onNavigate, sessionData, extraNavItems = [] }) {
+function SidebarContent({ onNavigate, sessionData, navItems = [], header = null }) {
   const activeId = useSidebarActiveId()
-  const allNavItems = [...navItems, ...extraNavItems]
+  const allNavItems = navItems.length ? navItems : navItemsDefault
+  const logoUrl = header?.logoUrl || '/images/logo.svg'
+  const brandTop = header?.brandTop || 'کودکستان'
+  const brandMain = header?.brandMain || 'برترین اندیشه'
 
   return (
     <div className="flex h-full flex-col bg-sidebar" dir="rtl">
@@ -23,13 +26,13 @@ function SidebarContent({ onNavigate, sessionData, extraNavItems = [] }) {
           className="group flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-accent/50"
         >
           <img
-            src="/images/logo.svg"
+            src={logoUrl}
             alt="لوگو"
             className="h-10 w-auto shrink-0 object-contain"
           />
           <div className="min-w-0">
-            <p className="text-[10px] font-medium text-muted-foreground leading-none">کودکستان</p>
-            <p className="text-sm font-bold text-foreground leading-tight mt-0.5">برترین اندیشه</p>
+            <p className="text-[10px] font-medium text-muted-foreground leading-none">{brandTop}</p>
+            <p className="text-sm font-bold text-foreground leading-tight mt-0.5">{brandMain}</p>
           </div>
         </Link>
       </div>
@@ -75,7 +78,7 @@ function SidebarContent({ onNavigate, sessionData, extraNavItems = [] }) {
   )
 }
 
-export default function Sidebar({ sessionData, hasAnnouncements = false, extraNavItems = [] }) {
+export default function Sidebar({ sessionData, hasAnnouncements = false, navItems = [], header = null }) {
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
@@ -111,7 +114,7 @@ export default function Sidebar({ sessionData, hasAnnouncements = false, extraNa
           open ? 'sidebar-mobile-in translate-x-0' : 'translate-x-full lg:translate-x-0',
         ].join(' ')}
       >
-        <SidebarContent onNavigate={close} sessionData={sessionData} extraNavItems={extraNavItems} />
+        <SidebarContent onNavigate={close} sessionData={sessionData} navItems={navItems} header={header} />
       </aside>
     </>
   )

@@ -5,10 +5,12 @@ import AdminHomeContentEditor from './AdminHomeContentEditor'
 import AdminContentListEditor from './AdminContentListEditor'
 import AdminMemoryAlbumsPanel from './AdminMemoryAlbumsPanel'
 import AdminContractArticlesEditor from './AdminContractArticlesEditor'
-import { Home, BookOpenCheck, Sparkles, Images, FileSignature } from 'lucide-react'
+import AdminSiteLayoutPanel from './AdminSiteLayoutPanel'
+import { Home, BookOpenCheck, Sparkles, Images, FileSignature, PanelRight } from 'lucide-react'
 
 const SUBTABS = [
   { key: 'home', label: 'صفحهٔ اصلی', icon: Home },
+  { key: 'layout', label: 'چیدمان و ساید‌بار', icon: PanelRight },
   { key: 'parentResource', label: 'آنچه والدین باید بدانند', icon: BookOpenCheck },
   { key: 'extraSkill', label: 'مهارت‌های فوق‌برنامه', icon: Sparkles },
   { key: 'memories', label: 'آلبوم خاطرات', icon: Images },
@@ -40,6 +42,7 @@ export default function AdminSiteContentPanel() {
       </div>
 
       {sub === 'home' && <AdminHomeContentEditor />}
+      {sub === 'layout' && <AdminSiteLayoutPanel />}
       {sub === 'parentResource' && (
         <AdminContentListEditor
           section="parentResource"

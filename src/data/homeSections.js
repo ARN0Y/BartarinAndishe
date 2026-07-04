@@ -10,7 +10,7 @@ export const founderInfo = {
   image: '/images/givi.jpg',
   imageAlt: 'پرتره جناب آقای شهرام گیوی — مؤسس کودکستان برترین اندیشه',
   portraitPosition: '86% 22%',
-  yearsExperience: '۳۱ سال سابقه درخشان در آموزش و پرورش',
+  yearsExperience: '',
   phone: '09133050035',
   instagram: '@bartarinandishe',
   education: [
@@ -45,7 +45,7 @@ export const managerInfo = {
   image: '/images/golabdar.jpg',
   imageAlt: 'پرتره سرکار خانم منیر گلابدار — مدیر کودکستان برترین اندیشه',
   portraitPosition: '86% 26%',
-  yearsExperience: '۲۳ سال سابقه درخشان در آموزش و پرورش',
+  yearsExperience: '',
   phone: '09130001965',
   instagram: '@bartarinandishe',
   education: [

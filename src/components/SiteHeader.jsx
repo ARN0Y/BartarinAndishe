@@ -6,8 +6,11 @@ import ParentLoginButton from './ParentLoginButton'
 import { MusicToggleButton } from './MusicProvider'
 import { Button } from './ui/button'
 
-export default function SiteHeader({ sessionData }) {
+export default function SiteHeader({ sessionData, header = null }) {
   const isLoggedIn = !!sessionData
+  const logoUrl = header?.logoUrl || '/images/logo.svg'
+  const brandTop = header?.brandTop || 'کودکستان'
+  const brandMain = header?.brandMain || 'برترین اندیشه'
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md shadow-sm">
@@ -47,13 +50,13 @@ export default function SiteHeader({ sessionData }) {
           className="group flex shrink-0 items-center gap-2 rounded-xl px-1 py-0.5 transition hover:bg-accent/50"
         >
           <img
-            src="/images/logo.svg"
+            src={logoUrl}
             alt="کودکستان برترین اندیشه"
             className="h-10 w-auto shrink-0 transition-transform duration-300 group-hover:scale-105 sm:h-12"
           />
           <div className="hidden min-w-0 text-center sm:block">
-            <p className="text-[10px] font-semibold tracking-wide text-pink-deep">کودکستان</p>
-            <p className="text-xs font-extrabold leading-tight text-foreground sm:text-sm">برترین اندیشه</p>
+            <p className="text-[10px] font-semibold tracking-wide text-pink-deep">{brandTop}</p>
+            <p className="text-xs font-extrabold leading-tight text-foreground sm:text-sm">{brandMain}</p>
           </div>
         </Link>
 

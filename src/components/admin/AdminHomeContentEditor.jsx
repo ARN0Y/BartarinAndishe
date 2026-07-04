@@ -2,12 +2,21 @@
 
 import { useEffect, useState } from 'react'
 import { AdminButton, AdminPanel, inputCls } from '@/components/admin/ui/AdminUI'
+import AdminImageUpload from '@/components/admin/AdminImageUpload'
 import { Save, Plus, X, RotateCcw } from 'lucide-react'
 
 const TEXT_LABELS = {
-  name: 'نام', role: 'سمت', shortIntro: 'معرفی کوتاه', phone: 'تلفن', instagram: 'اینستاگرام',
-  philosophy: 'فلسفهٔ مدیریت', workingHours: 'ساعات حضور', quote: 'نقل‌قول', messageShort: 'پیام کوتاه',
+  image: 'عکس', fullName: 'نام و نام خانوادگی', honorific: 'پیشوند (جناب آقای / سرکار خانم)',
+  name: 'نام', role: 'سمت', yearsExperience: 'سابقهٔ درخشان در آموزش و پرورش',
+  shortIntro: 'معرفی کوتاه', phone: 'موبایل', instagram: 'اینستاگرام',
+  philosophy: 'فلسفهٔ مدیریت', workingHours: 'ساعات حضور', quote: 'نقل‌قول',
+  messageTitle: 'عنوان پیام به اولیا', messageShort: 'پیام مؤسس به اولیای محترم',
 }
+const TEXT_HINTS = {
+  yearsExperience: 'خالی بگذارید تا به‌صورت خودکار محاسبه شود (مدیر ۲۵، مؤسس ۳۳ + هر سال یک سال).',
+  instagram: 'مثال: @bartarinandishe',
+}
+const TEXTAREA_KEYS = new Set(['philosophy', 'quote', 'shortIntro', 'messageShort'])
 const LIST_LABELS = {
   education: 'تحصیلات و سوابق علمی', responsibilities: 'سوابق حرفه‌ای', highlights: 'سوابق اجرایی و تخصصی',
 }
@@ -30,19 +39,34 @@ function PersonEditor({ who, label, value, defaults, onChange }) {
     <AdminPanel>
       <h4 className="mb-4 border-b border-border pb-2 text-sm font-bold text-foreground">{label}</h4>
       <div className="grid gap-4 sm:grid-cols-2">
-        {textKeys.map((k) => (
-          <div key={k} className={k === 'philosophy' || k === 'quote' || k === 'shortIntro' || k === 'messageShort' ? 'sm:col-span-2' : ''}>
-            <div className="mb-1.5 flex items-center justify-between">
-              <label className="text-sm font-medium">{TEXT_LABELS[k] || k}</label>
-              <button type="button" onClick={() => resetField(k)} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"><RotateCcw className="h-3 w-3" /> پیش‌فرض</button>
+        {textKeys.map((k) => {
+          if (k === 'image') {
+            return (
+              <div key={k} className="sm:col-span-2">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <label className="text-sm font-medium">{TEXT_LABELS[k] || k}</label>
+                  <button type="button" onClick={() => resetField(k)} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"><RotateCcw className="h-3 w-3" /> پیش‌فرض</button>
+                </div>
+                <AdminImageUpload label="" value={value[k] ?? ''} folder="home" onChange={(url) => setText(k, url)} />
+              </div>
+            )
+          }
+          const isTextarea = TEXTAREA_KEYS.has(k)
+          return (
+            <div key={k} className={isTextarea ? 'sm:col-span-2' : ''}>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="text-sm font-medium">{TEXT_LABELS[k] || k}</label>
+                <button type="button" onClick={() => resetField(k)} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"><RotateCcw className="h-3 w-3" /> پیش‌فرض</button>
+              </div>
+              {isTextarea ? (
+                <textarea className={`${inputCls} h-20 py-2`} value={value[k] ?? ''} onChange={(e) => setText(k, e.target.value)} />
+              ) : (
+                <input className={inputCls} value={value[k] ?? ''} onChange={(e) => setText(k, e.target.value)} placeholder={k === 'instagram' ? '@bartarinandishe' : undefined} />
+              )}
+              {TEXT_HINTS[k] ? <p className="mt-1 text-[11px] text-muted-foreground">{TEXT_HINTS[k]}</p> : null}
             </div>
-            {(k === 'philosophy' || k === 'quote' || k === 'shortIntro' || k === 'messageShort') ? (
-              <textarea className={`${inputCls} h-20 py-2`} value={value[k] ?? ''} onChange={(e) => setText(k, e.target.value)} />
-            ) : (
-              <input className={inputCls} value={value[k] ?? ''} onChange={(e) => setText(k, e.target.value)} />
-            )}
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {listKeys.map((k) => (
