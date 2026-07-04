@@ -4,8 +4,8 @@ import { contentGallerySections } from '@/data/contentGalleries'
 
 export const SITE_LAYOUT_KEY = 'siteLayout'
 
-// سه گالری قابل‌ویرایش (تصاویر + برچسب‌ها) — ترتیب همان ترتیب نمایش در صفحه
-export const GALLERY_IDS = ['edu-activities', 'multiple-intelligence', 'celebrations']
+// گالری‌های قابل‌ویرایش (تصاویر + برچسب‌ها) — ترتیب همان ترتیب نمایش در صفحه
+export const GALLERY_IDS = ['edu-activities', 'multiple-intelligence', 'celebrations', 'extra-skills']
 
 const HEADER_DEFAULT = {
   brandTop: 'کودکستان',

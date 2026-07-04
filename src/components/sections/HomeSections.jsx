@@ -4,17 +4,16 @@ import ManagerSection from './ManagerSection'
 import StaffSection from './StaffSection'
 import RegisterInfoSection from './RegisterInfoSection'
 import ParentResourcesSection from './ParentResourcesSection'
-import ExtraSkillsSection from './ExtraSkillsSection'
 import MemoryAlbumsSection from './MemoryAlbumsSection'
 import ContentGallerySection from '../ContentGallerySection'
 import { contentGallerySections } from '../../data/contentGalleries'
 import { staffSectionEnabled } from '../../data/homeSections'
 
-// ترتیب گالری‌ها = ترتیب ساید‌بار
-const GALLERY_ORDER = ['edu-activities', 'multiple-intelligence', 'celebrations']
+// ترتیب گالری‌ها = ترتیب ساید‌بار (پس از مناسبت‌ها، مهارت‌های فوق‌برنامه)
+const GALLERY_ORDER = ['edu-activities', 'multiple-intelligence', 'celebrations', 'extra-skills']
 
 export default function HomeSections({ cms = {}, galleries = null }) {
-  const { homeContent, parentResources = [], extraSkills = [], memoryAlbums = [] } = cms
+  const { homeContent, parentResources = [], memoryAlbums = [] } = cms
 
   // اگر override چیدمان موجود بود از آن استفاده کن، وگرنه پیش‌فرض data
   const gallerySections = galleries
@@ -29,7 +28,6 @@ export default function HomeSections({ cms = {}, galleries = null }) {
       {gallerySections.map((section) => (
         <ContentGallerySection key={section.id} section={section} />
       ))}
-      <ExtraSkillsSection items={extraSkills} />
       {staffSectionEnabled ? <StaffSection /> : null}
       <RegisterInfoSection />
       <ParentResourcesSection items={parentResources} />

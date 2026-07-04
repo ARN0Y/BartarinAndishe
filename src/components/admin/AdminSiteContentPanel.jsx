@@ -6,13 +6,12 @@ import AdminContentListEditor from './AdminContentListEditor'
 import AdminMemoryAlbumsPanel from './AdminMemoryAlbumsPanel'
 import AdminContractArticlesEditor from './AdminContractArticlesEditor'
 import AdminSiteLayoutPanel from './AdminSiteLayoutPanel'
-import { Home, BookOpenCheck, Sparkles, Images, FileSignature, PanelRight } from 'lucide-react'
+import { Home, BookOpenCheck, Images, FileSignature, PanelRight } from 'lucide-react'
 
 const SUBTABS = [
   { key: 'home', label: 'صفحهٔ اصلی', icon: Home },
   { key: 'layout', label: 'چیدمان و ساید‌بار', icon: PanelRight },
   { key: 'parentResource', label: 'آنچه والدین باید بدانند', icon: BookOpenCheck },
-  { key: 'extraSkill', label: 'مهارت‌های فوق‌برنامه', icon: Sparkles },
   { key: 'memories', label: 'آلبوم خاطرات', icon: Images },
   { key: 'contract', label: 'مواد قرارداد', icon: FileSignature },
 ]
@@ -49,14 +48,6 @@ export default function AdminSiteContentPanel() {
           title="آنچه والدین باید بدانند"
           description="مقالات و ویدیوهای کوتاه دربارهٔ فرزندپروری. موارد فعال در صفحهٔ اصلی نمایش داده می‌شوند."
           allowVideo
-        />
-      )}
-      {sub === 'extraSkill' && (
-        <AdminContentListEditor
-          section="extraSkill"
-          title="مهارت‌های فوق‌برنامه"
-          description="مهارت‌های فوق‌برنامهٔ کودکستان (هوش، رباتیک، هنر و...). موارد فعال در صفحهٔ اصلی نمایش داده می‌شوند."
-          allowVideo={false}
         />
       )}
       {sub === 'memories' && <AdminMemoryAlbumsPanel />}

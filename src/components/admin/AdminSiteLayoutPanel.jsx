@@ -5,11 +5,12 @@ import { AdminButton, AdminPanel, inputCls } from '@/components/admin/ui/AdminUI
 import AdminImageUpload from '@/components/admin/AdminImageUpload'
 import { Save, Plus, X, Image as ImageIcon, LayoutList, PanelRight, Images } from 'lucide-react'
 
-const GALLERY_ORDER = ['edu-activities', 'multiple-intelligence', 'celebrations']
+const GALLERY_ORDER = ['edu-activities', 'multiple-intelligence', 'celebrations', 'extra-skills']
 const GALLERY_LABELS = {
   'edu-activities': 'فعالیت‌های آموزشی',
   'multiple-intelligence': 'پرورش هوش چندگانه',
   'celebrations': 'مناسبت‌ها و جشن‌ها',
+  'extra-skills': 'مهارت‌های فوق‌برنامه',
 }
 
 function StripEditor({ items, onChange }) {

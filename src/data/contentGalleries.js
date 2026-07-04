@@ -48,4 +48,16 @@ export const contentGallerySections = [
       { id: 'c5', type: 'image', src: '/images/h3-3.jpg', caption: 'جشن کلاسی' },
     ],
   },
+  {
+    id: 'extra-skills',
+    badge: 'فوق‌برنامه',
+    title: 'مهارت‌های فوق‌برنامه',
+    subtitle: 'برنامه‌های تکمیلی برای شکوفایی استعدادهای کودکان',
+    strip: [
+      { id: 'e1', type: 'image', src: '/images/s3-5.jpg', caption: 'کارگاه هوش' },
+      { id: 'e2', type: 'image', src: '/images/s3-6.jpg', caption: 'رباتیک' },
+      { id: 'e3', type: 'image', src: '/images/s3-7.jpg', caption: 'لیوان‌چینی' },
+      { id: 'e4', type: 'image', src: '/images/s3-8.jpg', caption: 'هنر و خلاقیت' },
+    ],
+  },
 ]
