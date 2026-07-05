@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { toEnglishDigits } from '@/lib/digits'
 
 export default function NationalIdPinInput({ value, onChange, disabled = false, autoFocus = false }) {
   const refs = useRef([])
@@ -11,8 +12,9 @@ export default function NationalIdPinInput({ value, onChange, disabled = false, 
     if (autoFocus) refs.current[0]?.focus()
   }, [autoFocus])
 
-  function updateDigit(index, char) {
-    if (!/^\d?$/.test(char)) return
+  function updateDigit(index, rawChar) {
+    // پذیرش ارقام فارسی/عربی و تبدیل به انگلیسی (کیبورد فارسی روی موبایل)
+    const char = toEnglishDigits(String(rawChar ?? '')).replace(/\D/g, '').slice(-1)
     const next = digits.slice()
     next[index] = char
     onChange(next.join('').slice(0, 10))
@@ -35,7 +37,7 @@ export default function NationalIdPinInput({ value, onChange, disabled = false, 
 
   function handlePaste(e) {
     e.preventDefault()
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 10)
+    const pasted = toEnglishDigits(e.clipboardData.getData('text')).replace(/\D/g, '').slice(0, 10)
     if (!pasted) return
     onChange(pasted)
     const focusIdx = Math.min(pasted.length, 9)
@@ -65,7 +67,7 @@ export default function NationalIdPinInput({ value, onChange, disabled = false, 
               'focus:border-pink-deep focus:bg-white focus:ring-2 focus:ring-pink-deep/25',
               disabled ? 'opacity-60' : '',
             ].join(' ')}
-            onChange={(e) => updateDigit(index, e.target.value.replace(/\D/g, ''))}
+            onChange={(e) => updateDigit(index, e.target.value)}
             onKeyDown={(e) => handleKeyDown(index, e)}
           />
         ))}

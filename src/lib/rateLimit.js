@@ -3,6 +3,7 @@ const store = new Map()
 const LIMITS = {
   'admin-login': { windowMs: 15 * 60 * 1000, maxAttempts: 10 },
   'parent-login': { windowMs: 15 * 60 * 1000, maxAttempts: 8 },
+  'parent-forgot': { windowMs: 60 * 60 * 1000, maxAttempts: 6 },
   'pre-register': { windowMs: 60 * 60 * 1000, maxAttempts: 5 },
   default: { windowMs: 15 * 60 * 1000, maxAttempts: 10 },
 }

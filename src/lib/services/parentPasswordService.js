@@ -2,6 +2,23 @@ import crypto from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { AppError } from '@/lib/errors'
+import { onlyEnglishDigits } from '@/lib/digits'
+
+/** بازنشانی رمز والد به کد ملی نوآموز (فراموشی رمز) — رمز سفارشی پاک می‌شود */
+export async function resetParentPasswordToNationalId(nationalId) {
+  const normalized = onlyEnglishDigits(nationalId)
+  if (!/^\d{10}$/.test(normalized)) {
+    throw new AppError(422, 'کد ملی باید ۱۰ رقم باشد.')
+  }
+  const result = await prisma.student.updateMany({
+    where: { nationalId: normalized },
+    data: { parentPasswordHash: null, parentPasswordKey: null },
+  })
+  if (result.count === 0) {
+    throw new AppError(404, 'کد ملی نوآموز در سامانه یافت نشد.')
+  }
+  return { ok: true, count: result.count }
+}
 
 // محدودهٔ حروف (فارسی/انگلیسی) و ارقام (فارسی/انگلیسی) مجاز در رمز
 const LETTER_RE = /[A-Za-z؀-ۿ]/

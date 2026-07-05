@@ -16,7 +16,30 @@ export default function LoginForm({ type, redirectTo }) {
   const isAdmin = type === 'admin'
   const [form, setForm] = useState({ emailOrUsername: '', password: '', nationalId: '' })
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [loading, setLoading] = useState(false)
+
+  async function handleForgot() {
+    setError(''); setNotice('')
+    if (form.nationalId.length !== 10) {
+      setError('برای بازنشانی رمز، ابتدا کد ملی ۱۰ رقمی نوآموز را وارد کنید.')
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await fetch('/api/auth/parent/forgot-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nationalId: form.nationalId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'خطا در بازنشانی رمز')
+      setForm((v) => ({ ...v, password: '' }))
+      setNotice(data.message || 'رمز به کد ملی نوآموز بازنشانی شد.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (isAdmin) return
@@ -106,9 +129,12 @@ export default function LoginForm({ type, redirectTo }) {
                   dir="ltr"
                   className="text-center"
                 />
-                <p className="text-center text-xs text-muted-foreground">
-                  ورود اول: رمز همان کد ملی نوآموز است. می‌توانید بعداً در پنل آن را تغییر دهید.
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">ورود اول: رمز همان کد ملی نوآموز است.</p>
+                  <button type="button" onClick={handleForgot} disabled={loading} className="text-xs font-bold text-pink-deep hover:underline disabled:opacity-50">
+                    فراموشی رمز؟
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -116,6 +142,11 @@ export default function LoginForm({ type, redirectTo }) {
           {error && (
             <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
               {error}
+            </div>
+          )}
+          {notice && (
+            <div className="rounded-lg border border-emerald-300/50 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/25 dark:text-emerald-200">
+              {notice}
             </div>
           )}
 

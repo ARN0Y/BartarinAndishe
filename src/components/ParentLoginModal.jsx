@@ -11,7 +11,30 @@ export default function ParentLoginModal({ onClose }) {
   const [nationalId, setNationalId] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [loading, setLoading] = useState(false)
+
+  async function handleForgot() {
+    setError(''); setNotice('')
+    if (nationalId.length !== 10) {
+      setError('برای بازنشانی رمز، ابتدا کد ملی ۱۰ رقمی نوآموز را وارد کنید.')
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await fetch('/api/auth/parent/forgot-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nationalId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'خطا در بازنشانی رمز')
+      setPassword('')
+      setNotice(data.message || 'رمز به کد ملی نوآموز بازنشانی شد.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     setMounted(true)
@@ -88,14 +111,22 @@ export default function ParentLoginModal({ onClose }) {
               autoComplete="current-password"
               className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-center text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30"
             />
-            <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
-              ورود اول: رمز همان کد ملی نوآموز است.
-            </p>
+            <div className="mt-1.5 flex items-center justify-between">
+              <p className="text-[11px] text-muted-foreground">ورود اول: رمز همان کد ملی نوآموز است.</p>
+              <button type="button" onClick={handleForgot} disabled={loading} className="text-[11px] font-bold text-pink-deep hover:underline disabled:opacity-50">
+                فراموشی رمز؟
+              </button>
+            </div>
           </div>
 
           {error ? (
             <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-center text-xs font-semibold text-red-700">
               {error}
+            </p>
+          ) : null}
+          {notice ? (
+            <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-center text-xs font-semibold text-emerald-700">
+              {notice}
             </p>
           ) : null}
 
