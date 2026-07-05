@@ -18,6 +18,7 @@ import AdminContractSettingsPanel from '@/components/admin/AdminContractSettings
 import AdminSpotDifferencePanel from '@/components/admin/AdminSpotDifferencePanel'
 import AdminMatchingPanel from '@/components/admin/AdminMatchingPanel'
 import AdminClassesPanel from '@/components/admin/AdminClassesPanel'
+import AdminExcursionsPanel from '@/components/admin/AdminExcursionsPanel'
 import AdminSiteContentPanel from '@/components/admin/AdminSiteContentPanel'
 import AdminManualAddStudent from '@/components/admin/AdminManualAddStudent'
 import StudentMultiSelect from '@/components/admin/StudentMultiSelect'
@@ -679,12 +680,15 @@ export default function AdminDashboardClient() {
         <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive">{error}</p>
       ) : null}
 
-      {['overview', 'preReg', 'confirmed', 'classes', 'finance', 'contract'].includes(tab) ? (
+      {['overview', 'preReg', 'confirmed', 'classes', 'excursions', 'finance', 'contract'].includes(tab) ? (
         <AdminAcademicYearBar onChanged={reloadAcademicYearData} />
       ) : null}
 
       {/* ───── کلاس‌بندی ───── */}
       {tab === 'classes' && <AdminClassesPanel academicYear={academicYear} />}
+
+      {/* ───── اردوها ───── */}
+      {tab === 'excursions' && <AdminExcursionsPanel academicYear={academicYear} />}
 
       {/* ───── محتوای سایت ───── */}
       {tab === 'siteContent' && <AdminSiteContentPanel />}

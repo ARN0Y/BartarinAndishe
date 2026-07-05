@@ -50,6 +50,7 @@ model Student {
   announcementRecipients AnnouncementRecipient[]
   tuitionContract    TuitionContract?
   financialPlan      StudentFinancialPlan?
+  excursionConsents  ExcursionConsent[]
 
   @@unique([nationalId, academicYear])
   @@unique([studentCode, academicYear])
@@ -494,4 +495,57 @@ model AppSetting {
   key       String   @id
   value     String
   updatedAt DateTime @updatedAt
+}
+
+// ── اردوها ─────────────────────────────────────────────────
+model Excursion {
+  id           Int                @id @default(autoincrement())
+  academicYear String
+  title        String
+  description  String             @default("")
+  costRial     Int                @default(0)
+  isActive     Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  consents     ExcursionConsent[]
+
+  @@index([academicYear, isActive])
+}
+
+// رضایت‌نامهٔ اردو برای هر نوآموز — امضای الکترونیکی + تأیید پیامکی + پرداخت مجزا از شهریه
+model ExcursionConsent {
+  id                 Int       @id @default(autoincrement())
+  excursionId        Int
+  excursion          Excursion @relation(fields: [excursionId], references: [id], onDelete: Cascade)
+  studentId          Int
+  student            Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear       String
+
+  // امضای الکترونیکی و رضایت
+  signerRole         String?
+  parentSignatureUrl String?
+  consentAccepted    Boolean   @default(false)
+  signedAt           DateTime?
+
+  // تأیید پیامکی (OTP)
+  phone              String?
+  otpHash            String?
+  otpExpiresAt       DateTime?
+  otpAttempts        Int       @default(0)
+  phoneVerifiedAt    DateTime?
+
+  // پرداخت — کاملاً مجزا از فاکتور شهریه (در حسابداری شهریه محاسبه نمی‌شود)
+  amountRial         Int?
+  paymentStatus      String    @default("Unpaid") // Unpaid | Pending | Success
+  paymentTrackingId  String?   @unique
+  zarinpalAuthority  String?   @unique
+  zarinpalRefId      String?
+  paidAt             DateTime?
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@unique([excursionId, studentId])
+  @@index([excursionId])
+  @@index([studentId])
 }

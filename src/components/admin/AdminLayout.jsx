@@ -26,9 +26,10 @@ import {
   X,
   PanelRightClose,
   PanelRightOpen,
+  Tent,
 } from 'lucide-react'
 
-const YEAR_AWARE = ['preReg', 'confirmed', 'classes', 'finance', 'contract']
+const YEAR_AWARE = ['preReg', 'confirmed', 'classes', 'excursions', 'finance', 'contract']
 
 const NAV_GROUPS = [
   {
@@ -43,6 +44,7 @@ const NAV_GROUPS = [
       { key: 'preReg', icon: ClipboardList, label: 'پیش ثبت‌نام' },
       { key: 'confirmed', icon: CheckCircle2, label: 'ثبت‌نام‌های قطعی' },
       { key: 'classes', icon: GraduationCap, label: 'کلاس‌بندی' },
+      { key: 'excursions', icon: Tent, label: 'اردوها' },
     ],
   },
   {

@@ -7,6 +7,7 @@ import { INTERACTIVE_WORKSHEETS } from '@/data/interactiveWorksheets'
 import StudentProfileForm from './StudentProfileForm'
 import TuitionContractPanel from './TuitionContractPanel'
 import ParentPasswordCard from './ParentPasswordCard'
+import ParentExcursionsPanel from './ParentExcursionsPanel'
 import ParentShell from './ParentShell'
 import PrintInvoiceButton from '@/components/ui/PrintInvoiceButton'
 import CardNumberCopy from '@/components/CardNumberCopy'
@@ -29,7 +30,7 @@ import {
   FileText, Lock, Check, ChevronLeft, RefreshCw,
   ReceiptText, ShieldCheck, ClipboardCheck, MailOpen, Download,
   Gamepad2, ExternalLink, CircleDollarSign, LayoutDashboard, Settings,
-  ArrowLeft,
+  ArrowLeft, Tent,
 } from 'lucide-react'
 
 const TAB_ICONS = {
@@ -39,6 +40,7 @@ const TAB_ICONS = {
   finance: Wallet,
   worksheets: BookOpen,
   messages: Inbox,
+  excursions: Tent,
   settings: Settings,
 }
 
@@ -49,6 +51,7 @@ const PARENT_TABS = [
   { key: 'finance', label: 'امور مالی', requiresContract: true },
   { key: 'worksheets', label: 'کاربرگ‌ها', requiresContract: true },
   { key: 'messages', label: 'پیام‌ها', requiresContract: true },
+  { key: 'excursions', label: 'اردوها', requiresContract: true },
   { key: 'settings', label: 'تنظیمات و رمز' },
 ]
 
@@ -59,6 +62,7 @@ const TAB_SUBTITLE = {
   finance: 'فاکتور، اقساط و پرداخت‌ها',
   worksheets: 'کاربرگ‌ها و تمرین‌های تعاملی',
   messages: 'صندوق پیام‌های مدیریت',
+  excursions: 'رضایت‌نامه و پرداخت اردوها',
   settings: 'مدیریت رمز عبور و حساب',
 }
 
@@ -359,6 +363,7 @@ export default function ParentDashboardClient() {
         { key: 'finance', label: 'امور مالی', icon: TAB_ICONS.finance, locked: isTabLocked('finance', profileCompleted, contractSigned) },
         { key: 'worksheets', label: 'کاربرگ‌ها', icon: TAB_ICONS.worksheets, locked: isTabLocked('worksheets', profileCompleted, contractSigned) },
         { key: 'messages', label: 'پیام‌ها', icon: TAB_ICONS.messages, locked: isTabLocked('messages', profileCompleted, contractSigned), badgeCount: navBadge },
+        { key: 'excursions', label: 'اردوها', icon: TAB_ICONS.excursions, locked: isTabLocked('excursions', profileCompleted, contractSigned) },
       ],
     },
     {
@@ -438,6 +443,8 @@ export default function ParentDashboardClient() {
           onRefresh={loadAndMarkMessages}
         />
       )}
+
+      {activeTab === 'excursions' && contractSigned && <ParentExcursionsPanel />}
 
       {activeTab === 'settings' && (
         <div className="space-y-5">
