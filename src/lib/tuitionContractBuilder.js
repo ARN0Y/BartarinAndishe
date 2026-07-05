@@ -165,6 +165,10 @@ export function buildTuitionContractFields({
     parentSignatureUrl: parentSignatureUrl || '',
     uniformBoyToman: formatToman(settings.uniformBoyToman),
     uniformGirlToman: formatToman(settings.uniformGirlToman),
+    uniformBoyFromToman: formatToman(settings.uniformBoyFromToman),
+    uniformBoyToToman: formatToman(settings.uniformBoyToToman),
+    uniformGirlFromToman: formatToman(settings.uniformGirlFromToman),
+    uniformGirlToToman: formatToman(settings.uniformGirlToToman),
     bagSetToman: formatToman(settings.bagSetToman),
     customArticles: Array.isArray(customArticles) ? customArticles : [],
   }

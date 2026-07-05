@@ -1,89 +1,64 @@
-'use client'
-
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import SectionShell from './SectionShell'
-import VideoLightbox from '@/components/VideoLightbox'
-import { whyUsPoints } from '../../data/siteContact'
-import { GraduationCap, School, Play, Sparkles, BookOpen, Trophy } from 'lucide-react'
+import { Sparkles, ArrowLeft, Play } from 'lucide-react'
+import { WHY_US_TOPICS } from '@/data/whyUsTopics'
 
-const ICON_MAP = { GraduationCap, School, Sparkles, BookOpen, Trophy }
+function topicCover(topic) {
+  const media = topic.media || []
+  const img = media.find((m) => m.type !== 'video' && m.src)
+  if (img) return { src: img.src, video: false }
+  const vid = media.find((m) => m.type === 'video')
+  if (vid?.poster) return { src: vid.poster, video: true }
+  if (vid) return { src: null, video: true }
+  return { src: null, video: false }
+}
 
-export default function WhyUsSection() {
-  const router = useRouter()
-  const [activeVideo, setActiveVideo] = useState(null)
+export default function WhyUsSection({ topics }) {
+  const list = (topics && topics.length ? topics : WHY_US_TOPICS)
 
   return (
-    <>
-      <SectionShell
-        id="why-us"
-        badge="چرا ما؟"
-        title="چرا کودکستان برترین اندیشه؟"
-        subtitle="خلاصه‌ای از آنچه خانواده‌ها در انتخاب ما می‌بینند"
-        compact
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          {whyUsPoints.map((item) => {
-            const hasLightboxVideo = Boolean(item.videoUrl)
-            const hasVideoPage = Boolean(item.videoPageUrl)
-            const isClickable = hasLightboxVideo || hasVideoPage
-            const Tag = isClickable ? 'button' : 'article'
-            const IconComp = item.iconName ? ICON_MAP[item.iconName] : null
-
-            function handleClick() {
-              if (hasVideoPage) {
-                router.push(item.videoPageUrl)
-                return
-              }
-              if (hasLightboxVideo) {
-                setActiveVideo({ src: item.videoUrl, title: item.title })
-              }
-            }
-
-            return (
-              <Tag
-                key={item.title}
-                type={isClickable ? 'button' : undefined}
-                onClick={isClickable ? handleClick : undefined}
-                className={`flex w-full gap-4 rounded-xl border border-border bg-card p-4 text-right shadow-sm transition hover:shadow-md ${
-                  isClickable ? 'cursor-pointer hover:border-primary/30' : ''
-                }`}
-              >
-                {item.imageUrl ? (
-                  <span className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted ring-1 ring-border">
-                    <img
-                      src={item.imageUrl}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      draggable={false}
-                    />
-                  </span>
-                ) : IconComp ? (
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted" aria-hidden>
-                    <IconComp className="h-6 w-6 text-pink-deep" strokeWidth={1.5} />
+    <SectionShell
+      id="why-us"
+      badge="چرا ما؟"
+      title="چرا کودکستان برترین اندیشه؟"
+      subtitle="پنج دلیل مهم برای انتخاب ما — روی هر مورد کلیک کنید تا کامل ببینید"
+      compact
+    >
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+        {list.map((topic) => {
+          const cover = topicCover(topic)
+          return (
+            <Link
+              key={topic.id}
+              href={`/why/${topic.slug}`}
+              className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-right shadow-sm transition hover:-translate-y-0.5 hover:border-pink-deep/30 hover:shadow-md"
+            >
+              <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                {cover.src ? (
+                  <img src={cover.src} alt={topic.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" draggable={false} />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-pink-soft/60 to-muted">
+                    <Sparkles className="h-8 w-8 text-pink-deep/50" />
+                  </div>
+                )}
+                {cover.video ? (
+                  <span className="absolute left-2 top-2 flex h-7 w-7 items-center justify-center rounded-md bg-white/90 text-pink-deep shadow">
+                    <Play className="h-3.5 w-3.5 fill-current" />
                   </span>
                 ) : null}
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-bold text-foreground">{item.title}</h3>
-                  <p className="mt-1.5 text-sm leading-7 text-muted-foreground">{item.text}</p>
-                  {isClickable && (
-                    <p className="mt-2 flex items-center gap-1 text-xs font-semibold text-pink-deep">
-                      <Play className="h-3 w-3 fill-current" /> مشاهده ویدیو
-                    </p>
-                  )}
-                </div>
-              </Tag>
-            )
-          })}
-        </div>
-      </SectionShell>
-
-      <VideoLightbox
-        open={Boolean(activeVideo)}
-        src={activeVideo?.src}
-        title={activeVideo?.title}
-        onClose={() => setActiveVideo(null)}
-      />
-    </>
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" aria-hidden />
+              </div>
+              <div className="flex flex-1 flex-col p-3">
+                <h3 className="text-[13px] font-bold leading-6 text-foreground sm:text-sm">{topic.title}</h3>
+                <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-pink-deep">
+                  مشاهده
+                  <ArrowLeft className="h-3 w-3 transition-transform group-hover:-translate-x-0.5" />
+                </span>
+              </div>
+            </Link>
+          )
+        })}
+      </div>
+    </SectionShell>
   )
 }

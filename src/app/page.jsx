@@ -2,15 +2,20 @@ import { getSession } from '@/lib/auth/session'
 import { getActiveAnnouncements } from '@/lib/services/announcementService'
 import { getMergedHomeContent } from '@/lib/services/homeContentService'
 import { getMergedSiteLayout } from '@/lib/services/siteLayoutService'
+import { getMergedWhyUsTopics } from '@/lib/services/whyUsService'
 import HomePage from '../components/HomePage'
 
 export const dynamic = 'force-dynamic'
 
 async function loadCms() {
   try {
-    return { homeContent: await getMergedHomeContent() }
+    const [homeContent, whyUs] = await Promise.all([
+      getMergedHomeContent(),
+      getMergedWhyUsTopics(),
+    ])
+    return { homeContent, whyUs }
   } catch {
-    return { homeContent: null }
+    return { homeContent: null, whyUs: [] }
   }
 }
 

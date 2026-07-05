@@ -12,7 +12,7 @@ import { staffSectionEnabled } from '../../data/homeSections'
 const GALLERY_ORDER = ['edu-activities', 'multiple-intelligence', 'celebrations', 'extra-skills']
 
 export default function HomeSections({ cms = {}, galleries = null }) {
-  const { homeContent } = cms
+  const { homeContent, whyUs } = cms
 
   const gallerySections = galleries
     ? GALLERY_ORDER.map((id) => ({ id, ...(galleries[id] || {}) })).filter((s) => (s.strip || []).length > 0)
@@ -21,7 +21,7 @@ export default function HomeSections({ cms = {}, galleries = null }) {
   return (
     <>
       <FounderSection info={homeContent?.founder} />
-      <WhyUsSection />
+      <WhyUsSection topics={whyUs} />
       <ManagerSection info={homeContent?.manager} />
       {gallerySections.map((section) => (
         <ContentGallerySection key={section.id} section={section} />

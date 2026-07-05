@@ -44,8 +44,10 @@ export default function AdminContractSettingsPanel({ academicYear }) {
   const [settings, setSettings] = useState(null)
   const [tuitionRial, setTuitionRial] = useState('')
   const [tuitionRialWords, setTuitionRialWords] = useState('')
-  const [uniformBoyToman, setUniformBoyToman] = useState('')
-  const [uniformGirlToman, setUniformGirlToman] = useState('')
+  const [uniformBoyFrom, setUniformBoyFrom] = useState('')
+  const [uniformBoyTo, setUniformBoyTo] = useState('')
+  const [uniformGirlFrom, setUniformGirlFrom] = useState('')
+  const [uniformGirlTo, setUniformGirlTo] = useState('')
   const [bagSetToman, setBagSetToman] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -63,8 +65,10 @@ export default function AdminContractSettingsPanel({ academicYear }) {
       setSettings(json.settings)
       setTuitionRial(json.settings.tuitionRial ? formatThousands(json.settings.tuitionRial) : '')
       setTuitionRialWords(json.settings.tuitionRialWords || '')
-      setUniformBoyToman(json.settings.uniformBoyToman ? formatThousands(json.settings.uniformBoyToman) : '')
-      setUniformGirlToman(json.settings.uniformGirlToman ? formatThousands(json.settings.uniformGirlToman) : '')
+      setUniformBoyFrom(json.settings.uniformBoyFromToman ? formatThousands(json.settings.uniformBoyFromToman) : '')
+      setUniformBoyTo(json.settings.uniformBoyToToman ? formatThousands(json.settings.uniformBoyToToman) : '')
+      setUniformGirlFrom(json.settings.uniformGirlFromToman ? formatThousands(json.settings.uniformGirlFromToman) : '')
+      setUniformGirlTo(json.settings.uniformGirlToToman ? formatThousands(json.settings.uniformGirlToToman) : '')
       setBagSetToman(json.settings.bagSetToman ? formatThousands(json.settings.bagSetToman) : '')
     } catch (err) {
       setError(err.message)
@@ -114,8 +118,10 @@ export default function AdminContractSettingsPanel({ academicYear }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           year: academicYear,
-          uniformBoyToman: uniformBoyToman.replace(/\D/g, ''),
-          uniformGirlToman: uniformGirlToman.replace(/\D/g, ''),
+          uniformBoyFromToman: uniformBoyFrom.replace(/\D/g, ''),
+          uniformBoyToToman: uniformBoyTo.replace(/\D/g, ''),
+          uniformGirlFromToman: uniformGirlFrom.replace(/\D/g, ''),
+          uniformGirlToToman: uniformGirlTo.replace(/\D/g, ''),
           bagSetToman: bagSetToman.replace(/\D/g, ''),
         }),
       })
@@ -212,37 +218,25 @@ export default function AdminContractSettingsPanel({ academicYear }) {
 
       <AdminPanel>
         <h3 className="mb-1 text-sm font-bold text-slate-800">قیمت فرم و کیف (بند ۷ قرارداد)</h3>
-        <p className="mb-4 text-xs text-slate-500">مبالغ به تومان — در متن قرارداد والدین نمایش داده می‌شود.</p>
-        <div className="grid gap-4 md:grid-cols-3">
+        <p className="mb-4 text-xs text-slate-500">قیمت فرم نوآموزان «بستگی به سایز» است و به‌صورت بازه (از/تا) در متن قرارداد نمایش داده می‌شود. مبالغ به تومان.</p>
+        <div className="space-y-4">
           <div>
-            <label className={labelCls}>هزینه فرم نوآموز پسر (تومان)</label>
-            <input
-              className={inputCls}
-              dir="ltr"
-              value={uniformBoyToman}
-              onChange={(e) => setUniformBoyToman(formatThousands(e.target.value))}
-              placeholder="مثلاً 700,000"
-            />
+            <p className="mb-2 text-xs font-bold text-slate-700">هزینه فرم نوآموز پسر (بستگی به سایز — بازه)</p>
+            <div className="grid gap-3 sm:grid-cols-2 sm:max-w-lg">
+              <input className={inputCls} dir="ltr" value={uniformBoyFrom} onChange={(e) => setUniformBoyFrom(formatThousands(e.target.value))} placeholder="از (کمترین) — مثلاً 700,000" />
+              <input className={inputCls} dir="ltr" value={uniformBoyTo} onChange={(e) => setUniformBoyTo(formatThousands(e.target.value))} placeholder="تا (بیشترین) — مثلاً 900,000" />
+            </div>
           </div>
           <div>
-            <label className={labelCls}>هزینه فرم نوآموز دختر با مقنعه (تومان)</label>
-            <input
-              className={inputCls}
-              dir="ltr"
-              value={uniformGirlToman}
-              onChange={(e) => setUniformGirlToman(formatThousands(e.target.value))}
-              placeholder="مثلاً 800,000"
-            />
+            <p className="mb-2 text-xs font-bold text-slate-700">هزینه فرم نوآموز دختر با مقنعه (بستگی به سایز — بازه)</p>
+            <div className="grid gap-3 sm:grid-cols-2 sm:max-w-lg">
+              <input className={inputCls} dir="ltr" value={uniformGirlFrom} onChange={(e) => setUniformGirlFrom(formatThousands(e.target.value))} placeholder="از (کمترین) — مثلاً 800,000" />
+              <input className={inputCls} dir="ltr" value={uniformGirlTo} onChange={(e) => setUniformGirlTo(formatThousands(e.target.value))} placeholder="تا (بیشترین) — مثلاً 1,000,000" />
+            </div>
           </div>
-          <div>
+          <div className="sm:max-w-xs">
             <label className={labelCls}>قیمت کیف و جامدادی (تومان)</label>
-            <input
-              className={inputCls}
-              dir="ltr"
-              value={bagSetToman}
-              onChange={(e) => setBagSetToman(formatThousands(e.target.value))}
-              placeholder="مثلاً 400,000"
-            />
+            <input className={inputCls} dir="ltr" value={bagSetToman} onChange={(e) => setBagSetToman(formatThousands(e.target.value))} placeholder="مثلاً 400,000" />
           </div>
         </div>
         <div className="mt-4">

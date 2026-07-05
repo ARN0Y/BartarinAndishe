@@ -182,10 +182,17 @@ export default function TuitionContractDocument({ fields, signed = false }) {
         <ClauseBlock n={7} title="فرم و کیف و جامدادی">
           <p>
             فرم لباس نوآموزان در داخل کودکستان و در حضور ولی نوآموز اندازه گیری می گردد. لذا والدین گرامی
-            در انتخاب سایز دقت لازم را داشته باشند، چون تغییر سایز امکان پذیر نمی باشد. هزینه فرم نوآموز پسر{' '}
-            <Fill value={f.uniformBoyToman ? `${f.uniformBoyToman} تومان` : ''} placeholder="----------- تومان" />{' '}
-            و هزینه فرم نوآموز دختر با مقنعه{' '}
-            <Fill value={f.uniformGirlToman ? `${f.uniformGirlToman} تومان` : ''} placeholder="----------- تومان" />
+            در انتخاب سایز دقت لازم را داشته باشند، چون تغییر سایز امکان پذیر نمی باشد. قیمت هزینه فرم نوآموز پسر{' '}
+            <span className="font-extrabold text-navy">«بستگی به سایز»</span> بین{' '}
+            <Fill value={f.uniformBoyFromToman ? `${f.uniformBoyFromToman} تومان` : ''} placeholder="..............." />{' '}
+            و{' '}
+            <Fill value={f.uniformBoyToToman ? `${f.uniformBoyToToman} تومان` : ''} placeholder="..............." />{' '}
+            متغیر می‌باشد و قیمت هزینه فرم نوآموز دختر با مقنعه{' '}
+            <span className="font-extrabold text-navy">«بستگی به سایز»</span> بین{' '}
+            <Fill value={f.uniformGirlFromToman ? `${f.uniformGirlFromToman} تومان` : ''} placeholder="..............." />{' '}
+            و{' '}
+            <Fill value={f.uniformGirlToToman ? `${f.uniformGirlToToman} تومان` : ''} placeholder="..............." />{' '}
+            متغیر می‌باشد.
           </p>
           <p className="mt-1">
             قیمت کیف و جامدادی با چاپ عکس نوآموز بر روی آن مبلغ{' '}

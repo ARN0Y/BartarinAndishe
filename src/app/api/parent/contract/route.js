@@ -48,6 +48,16 @@ export async function GET(request) {
 
     if (contract) {
       const snapshot = JSON.parse(contract.snapshot)
+      // امضا/مهر رسمی مدیر و مؤسس همیشه از تنظیمات جاری خوانده شود (نه snapshot منجمد)
+      // تا ویرایش‌های مدیر روی قراردادهای امضاشده هم بازتاب پیدا کند.
+      try {
+        const currentSettings = academicYear ? await getContractSettings(academicYear) : null
+        if (currentSettings) {
+          if (currentSettings.managerSignatureUrl) snapshot.managerSignatureUrl = currentSettings.managerSignatureUrl
+          if (currentSettings.managerStampUrl) snapshot.managerStampUrl = currentSettings.managerStampUrl
+          if (currentSettings.founderSignatureUrl) snapshot.founderSignatureUrl = currentSettings.founderSignatureUrl
+        }
+      } catch { /* در صورت خطا از snapshot استفاده می‌شود */ }
       return Response.json({
         profileCompleted,
         signed: true,

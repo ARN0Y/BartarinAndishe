@@ -17,8 +17,18 @@ const DEFAULTS = {
   founderSignatureUrl: '',
   uniformBoyToman: '',
   uniformGirlToman: '',
+  // بازهٔ قیمت فرم (بستگی به سایز)
+  uniformBoyFromToman: '',
+  uniformBoyToToman: '',
+  uniformGirlFromToman: '',
+  uniformGirlToToman: '',
   bagSetToman: '',
 }
+
+const TOMAN_FIELDS = [
+  'uniformBoyToman', 'uniformGirlToman', 'bagSetToman',
+  'uniformBoyFromToman', 'uniformBoyToToman', 'uniformGirlFromToman', 'uniformGirlToToman',
+]
 
 function formatToman(value) {
   const n = Number(String(value || '').replace(/\D/g, ''))
@@ -63,15 +73,11 @@ export async function saveContractSettings(academicYear, payload) {
     managerSignatureUrl: payload.managerSignatureUrl ?? current.managerSignatureUrl,
     managerStampUrl: payload.managerStampUrl ?? current.managerStampUrl,
     founderSignatureUrl: payload.founderSignatureUrl ?? current.founderSignatureUrl,
-    uniformBoyToman: payload.uniformBoyToman !== undefined
-      ? String(payload.uniformBoyToman || '').replace(/\D/g, '')
-      : current.uniformBoyToman,
-    uniformGirlToman: payload.uniformGirlToman !== undefined
-      ? String(payload.uniformGirlToman || '').replace(/\D/g, '')
-      : current.uniformGirlToman,
-    bagSetToman: payload.bagSetToman !== undefined
-      ? String(payload.bagSetToman || '').replace(/\D/g, '')
-      : current.bagSetToman,
+  }
+  for (const field of TOMAN_FIELDS) {
+    next[field] = payload[field] !== undefined
+      ? String(payload[field] || '').replace(/\D/g, '')
+      : current[field]
   }
 
   await prisma.appSetting.upsert({
@@ -90,6 +96,10 @@ export function formatContractSettingsForDisplay(settings) {
     tuitionRialFormatted: rial ? `${formatCurrency(rial)} ریال` : '',
     uniformBoyTomanFormatted: formatToman(settings.uniformBoyToman),
     uniformGirlTomanFormatted: formatToman(settings.uniformGirlToman),
+    uniformBoyFromTomanFormatted: formatToman(settings.uniformBoyFromToman),
+    uniformBoyToTomanFormatted: formatToman(settings.uniformBoyToToman),
+    uniformGirlFromTomanFormatted: formatToman(settings.uniformGirlFromToman),
+    uniformGirlToTomanFormatted: formatToman(settings.uniformGirlToToman),
     bagSetTomanFormatted: formatToman(settings.bagSetToman),
   }
 }
