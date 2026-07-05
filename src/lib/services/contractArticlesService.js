@@ -10,6 +10,7 @@ function normalizeArticles(data) {
     .map((a) => ({
       title: String(a?.title || '').trim(),
       numbered: Boolean(a?.numbered),
+      signatures: Boolean(a?.signatures),
       clauses: Array.isArray(a?.clauses)
         ? a.clauses.map((c) => String(c || '').trim()).filter(Boolean)
         : [],

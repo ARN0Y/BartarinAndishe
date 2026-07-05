@@ -94,7 +94,27 @@ function renderRich(text, tokens) {
   })
 }
 
-function ArticleBlock({ article, tokens }) {
+function SectionSignatureBox({ label, name, url, alt }) {
+  return (
+    <div>
+      <p className="text-[13px]">{label}{name ? <span className="font-bold text-navy"> {name}</span> : null}</p>
+      <div className="mt-2 flex h-20 w-40 items-center justify-center rounded-lg border border-dashed border-navy/15 bg-white p-2">
+        {url ? <SignatureImg src={url} alt={alt} className="max-h-full max-w-full" /> : <span className="text-xs text-slate-300">امضا</span>}
+      </div>
+    </div>
+  )
+}
+
+function SectionSignatures({ f }) {
+  return (
+    <div className="mt-5 grid gap-6 border-t border-dotted border-navy/20 pt-5 sm:grid-cols-2">
+      <SectionSignatureBox label="امضای ولی نوآموز:" name={f.parentFullName} url={f.parentSignatureUrl} alt="امضای ولی" />
+      <SectionSignatureBox label="امضای مؤسس:" name={f.founderName} url={f.founderSignatureUrl} alt="امضای مؤسس" />
+    </div>
+  )
+}
+
+function ArticleBlock({ article, tokens, f }) {
   const clauses = article.clauses || []
   return (
     <div>
@@ -114,6 +134,7 @@ function ArticleBlock({ article, tokens }) {
           ))}
         </div>
       )}
+      {article.signatures ? <SectionSignatures f={f} /> : null}
     </div>
   )
 }
@@ -141,7 +162,7 @@ export default function TuitionContractDocument({ fields }) {
 
       {/* مواد قرارداد — از پنل مدیر قابل‌ویرایش */}
       {articles.map((article, idx) => (
-        <ArticleBlock key={idx} article={article} tokens={tokens} />
+        <ArticleBlock key={idx} article={article} tokens={tokens} f={f} />
       ))}
 
       {/* جدول پرداخت شهریه (پویا — از قرارداد مالی) */}

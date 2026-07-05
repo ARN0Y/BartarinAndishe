@@ -36,6 +36,7 @@ export default function AdminContractArticlesEditor() {
   function removeArticle(i) { if (window.confirm('این ماده حذف شود؟')) setArticles((a) => a.filter((_, idx) => idx !== i)) }
   function setTitle(i, v) { setArticles((a) => a.map((art, idx) => idx === i ? { ...art, title: v } : art)) }
   function setNumbered(i, v) { setArticles((a) => a.map((art, idx) => idx === i ? { ...art, numbered: v } : art)) }
+  function setSignatures(i, v) { setArticles((a) => a.map((art, idx) => idx === i ? { ...art, signatures: v } : art)) }
   function addClause(i) { setArticles((a) => a.map((art, idx) => idx === i ? { ...art, clauses: [...(art.clauses || []), ''] } : art)) }
   function setClause(i, ci, v) { setArticles((a) => a.map((art, idx) => idx === i ? { ...art, clauses: art.clauses.map((c, x) => x === ci ? v : c) } : art)) }
   function removeClause(i, ci) { setArticles((a) => a.map((art, idx) => idx === i ? { ...art, clauses: art.clauses.filter((_, x) => x !== ci) } : art)) }
@@ -90,10 +91,16 @@ export default function AdminContractArticlesEditor() {
               <input className={inputCls} value={art.title} onChange={(e) => setTitle(i, e.target.value)} placeholder={`عنوان ماده (مثلاً ماده ${i + 1}- ...)`} />
               <button type="button" onClick={() => removeArticle(i)} className="shrink-0 text-destructive" title="حذف ماده"><X className="h-4 w-4" /></button>
             </div>
-            <label className="mt-2 flex w-fit cursor-pointer items-center gap-2 text-xs font-semibold text-muted-foreground">
-              <input type="checkbox" checked={Boolean(art.numbered)} onChange={(e) => setNumbered(i, e.target.checked)} className="size-4 accent-primary" />
-              بندها شماره‌گذاری شوند (۱- ۲- ...)
-            </label>
+            <div className="mt-2 flex flex-wrap items-center gap-4">
+              <label className="flex w-fit cursor-pointer items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <input type="checkbox" checked={Boolean(art.numbered)} onChange={(e) => setNumbered(i, e.target.checked)} className="size-4 accent-primary" />
+                بندها شماره‌گذاری شوند (۱- ۲- ...)
+              </label>
+              <label className="flex w-fit cursor-pointer items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <input type="checkbox" checked={Boolean(art.signatures)} onChange={(e) => setSignatures(i, e.target.checked)} className="size-4 accent-primary" />
+                زیر این ماده، امضای ولی و مؤسس نمایش داده شود
+              </label>
+            </div>
             <div className="mt-3 space-y-2 pr-2">
               {(art.clauses || []).map((clause, ci) => (
                 <div key={ci} className="flex items-start gap-2">
