@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AdminButton, AdminPanel, inputCls } from '@/components/admin/ui/AdminUI'
 import AdminImageUpload from '@/components/admin/AdminImageUpload'
-import { Plus, Trash2, Eye, EyeOff, Images, X, Pencil, Check } from 'lucide-react'
+import { Plus, Trash2, Eye, EyeOff, Images, X, Pencil, Check, CalendarDays } from 'lucide-react'
 
 export default function AdminMemoryAlbumsPanel() {
   const [albums, setAlbums] = useState([])
@@ -92,6 +92,9 @@ export default function AdminMemoryAlbumsPanel() {
     if (ok) setEditingId(null)
   }
 
+  // دسته‌بندی آلبوم‌ها بر اساس سال (جدیدترین اول)
+  const years = [...new Set(albums.map((a) => a.year).filter(Boolean))].sort((a, b) => b.localeCompare(a, 'fa'))
+
   return (
     <div className="space-y-5">
       <div>
@@ -120,8 +123,16 @@ export default function AdminMemoryAlbumsPanel() {
       ) : albums.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border py-8 text-center text-sm text-muted-foreground">هنوز آلبومی ساخته نشده است.</p>
       ) : (
-        <div className="space-y-4">
-          {albums.map((album) => (
+        <div className="space-y-6">
+          {years.map((yr) => (
+            <div key={yr}>
+              <div className="mb-2 flex items-center gap-2 border-b border-border pb-1.5">
+                <CalendarDays className="h-4 w-4 text-pink-deep" />
+                <h4 className="text-sm font-extrabold text-foreground">سال {yr}</h4>
+                <span className="text-xs text-muted-foreground">({albums.filter((a) => a.year === yr).length.toLocaleString('fa-IR')} آلبوم)</span>
+              </div>
+              <div className="space-y-4">
+                {albums.filter((album) => album.year === yr).map((album) => (
             <div key={album.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 {editingId === album.id ? (
@@ -164,6 +175,9 @@ export default function AdminMemoryAlbumsPanel() {
                 <div className="flex h-24 items-center">
                   <AdminImageUpload label="" value="" folder="memories" onChange={(url) => addPhoto(album.id, url)} />
                 </div>
+              </div>
+            </div>
+                ))}
               </div>
             </div>
           ))}

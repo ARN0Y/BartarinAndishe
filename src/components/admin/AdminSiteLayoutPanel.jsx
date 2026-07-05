@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AdminButton, AdminPanel, inputCls } from '@/components/admin/ui/AdminUI'
 import AdminImageUpload from '@/components/admin/AdminImageUpload'
+import AdminVideoUpload from '@/components/admin/AdminVideoUpload'
 import { Save, Plus, X, Image as ImageIcon, LayoutList, PanelRight, Images } from 'lucide-react'
 
 const GALLERY_ORDER = ['edu-activities', 'multiple-intelligence', 'celebrations', 'extra-skills']
@@ -45,8 +46,8 @@ function StripEditor({ items, onChange }) {
               </div>
               {it.type === 'video' ? (
                 <>
-                  <input className={`${inputCls} ltr text-left`} value={it.src || ''} onChange={(e) => update(i, { src: e.target.value })} placeholder="نشانی ویدیو (mp4)" />
-                  <input className={`${inputCls} ltr text-left`} value={it.poster || ''} onChange={(e) => update(i, { poster: e.target.value })} placeholder="نشانی تصویر پوستر (اختیاری)" />
+                  <AdminVideoUpload label="ویدیو" value={it.src || ''} onChange={(url) => update(i, { src: url })} />
+                  <AdminImageUpload label="تصویر پوستر (اختیاری)" value={it.poster || ''} folder="cms" onChange={(url) => update(i, { poster: url })} />
                 </>
               ) : (
                 <AdminImageUpload label="" value={it.src || ''} folder="cms" onChange={(url) => update(i, { src: url })} />

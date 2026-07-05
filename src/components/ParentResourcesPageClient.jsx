@@ -21,24 +21,22 @@ function TopicCard({ item, open, onToggle }) {
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center gap-3 px-4 py-4 text-right transition-colors hover:bg-muted/40 sm:px-5"
+        className="flex w-full items-center gap-3 px-4 py-3 text-right transition-colors hover:bg-muted/40"
         aria-expanded={open}
       >
         <span
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
             open ? 'bg-pink-deep text-white' : 'bg-pink/10 text-pink-deep'
           }`}
         >
-          {video ? <Video className="h-5 w-5" strokeWidth={1.8} /> : <BookOpenCheck className="h-5 w-5" strokeWidth={1.8} />}
+          {video ? <Video className="h-4 w-4" strokeWidth={1.9} /> : <BookOpenCheck className="h-4 w-4" strokeWidth={1.9} />}
         </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-extrabold text-foreground sm:text-base">{item.title}</span>
-          <span className="mt-0.5 block text-[11px] font-semibold text-pink-deep/80">
-            {video ? 'ویدیو — برای پخش کلیک کنید' : 'مقاله — برای مطالعه کلیک کنید'}
-          </span>
+        <span className="min-w-0 flex-1 text-sm font-bold text-foreground sm:text-[15px]">{item.title}</span>
+        <span className="hidden shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground sm:inline">
+          {video ? 'ویدیو' : 'مقاله'}
         </span>
         <ChevronDown
-          className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-300 ${open ? 'rotate-180 text-pink-deep' : ''}`}
+          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 ${open ? 'rotate-180 text-pink-deep' : ''}`}
         />
       </button>
 
@@ -64,7 +62,7 @@ function TopicCard({ item, open, onToggle }) {
                 <img
                   src={item.mediaUrl}
                   alt={item.title}
-                  className="max-h-80 w-full rounded-xl object-cover shadow-sm ring-1 ring-border"
+                  className="mx-auto block max-h-[70vh] w-auto max-w-full rounded-xl object-contain shadow-sm ring-1 ring-border"
                 />
               ) : null}
 
@@ -98,7 +96,7 @@ function TopicCard({ item, open, onToggle }) {
 }
 
 export default function ParentResourcesPageClient({ items = [] }) {
-  const [openId, setOpenId] = useState(items[0]?.id ?? null)
+  const [openId, setOpenId] = useState(null)
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
