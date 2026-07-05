@@ -170,7 +170,7 @@ export function buildTuitionContractFields({
     uniformGirlFromToman: formatToman(settings.uniformGirlFromToman),
     uniformGirlToToman: formatToman(settings.uniformGirlToToman),
     bagSetToman: formatToman(settings.bagSetToman),
-    customArticles: Array.isArray(customArticles) ? customArticles : [],
+    articles: Array.isArray(customArticles) ? customArticles : [],
   }
 }
 
