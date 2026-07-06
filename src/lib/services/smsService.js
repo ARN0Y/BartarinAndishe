@@ -35,6 +35,38 @@ export async function sendSms(phone, text) {
   }
 
   try {
+    if (provider === 'farazsms') {
+      // فراز اس‌ام‌اس (iranpayamak) — ارسال ساده
+      // هدر احراز هویت فقط توکن است (بخش بعد از «:» در کلید پنل).
+      const sender = process.env.SMS_SENDER || ''
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 50000)
+      try {
+        const res = await fetch('https://api.iranpayamak.com/ws/v1/sms/simple', {
+          method: 'POST',
+          headers: {
+            'Api-Key': apiKey,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            text,
+            line_number: sender,
+            recipients: [receptor],
+            number_format: 'english',
+            schedule: null,
+          }),
+          signal: controller.signal,
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok || data?.status !== 'success') {
+          throw new Error(data?.message || `ارسال پیامک ناموفق بود (HTTP ${res.status}).`)
+        }
+        return { sent: true, id: data?.data?.id ?? data?.data }
+      } finally {
+        clearTimeout(timer)
+      }
+    }
     if (provider === 'kavenegar') {
       const sender = process.env.SMS_SENDER || ''
       const url = `https://api.kavenegar.com/v1/${apiKey}/sms/send.json?receptor=${encodeURIComponent(receptor)}&sender=${encodeURIComponent(sender)}&message=${encodeURIComponent(text)}`
