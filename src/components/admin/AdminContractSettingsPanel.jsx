@@ -49,6 +49,10 @@ export default function AdminContractSettingsPanel({ academicYear }) {
   const [uniformGirlFrom, setUniformGirlFrom] = useState('')
   const [uniformGirlTo, setUniformGirlTo] = useState('')
   const [bagSetToman, setBagSetToman] = useState('')
+  const [bankAccount, setBankAccount] = useState('')
+  const [bankName, setBankName] = useState('')
+  const [accountHolder, setAccountHolder] = useState('')
+  const [accountNationalId, setAccountNationalId] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState('')
@@ -70,6 +74,10 @@ export default function AdminContractSettingsPanel({ academicYear }) {
       setUniformGirlFrom(json.settings.uniformGirlFromToman ? formatThousands(json.settings.uniformGirlFromToman) : '')
       setUniformGirlTo(json.settings.uniformGirlToToman ? formatThousands(json.settings.uniformGirlToToman) : '')
       setBagSetToman(json.settings.bagSetToman ? formatThousands(json.settings.bagSetToman) : '')
+      setBankAccount(json.settings.bankAccount || '')
+      setBankName(json.settings.bankName || '')
+      setAccountHolder(json.settings.accountHolder || '')
+      setAccountNationalId(json.settings.accountNationalId || '')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -129,6 +137,37 @@ export default function AdminContractSettingsPanel({ academicYear }) {
       if (!res.ok) throw new Error(json.message)
       setSettings(json.settings)
       setMessage('قیمت‌های فرم و کیف ذخیره شد.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function saveBankInfo() {
+    setSaving(true)
+    setMessage('')
+    setError('')
+    try {
+      const res = await fetch('/api/admin/contract-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          year: academicYear,
+          bankAccount,
+          bankName,
+          accountHolder,
+          accountNationalId,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.message)
+      setSettings(json.settings)
+      setBankAccount(json.settings.bankAccount || '')
+      setBankName(json.settings.bankName || '')
+      setAccountHolder(json.settings.accountHolder || '')
+      setAccountNationalId(json.settings.accountNationalId || '')
+      setMessage('اطلاعات حساب بانکی ذخیره شد.')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -242,6 +281,34 @@ export default function AdminContractSettingsPanel({ academicYear }) {
         <div className="mt-4">
           <AdminButton onClick={saveUniformPrices} disabled={saving}>
             {saving ? 'در حال ذخیره...' : 'ذخیره قیمت‌های فرم و کیف'}
+          </AdminButton>
+        </div>
+      </AdminPanel>
+
+      <AdminPanel>
+        <h3 className="mb-1 text-sm font-bold text-slate-800">اطلاعات حساب بانکی (بند واریز شهریه)</h3>
+        <p className="mb-4 text-xs text-slate-500">این اطلاعات در متن قرارداد برای واریز شهریه نمایش داده می‌شود. اگر خالی بماند، مقدار پیش‌فرض قرارداد استفاده می‌شود.</p>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className={labelCls}>شماره حساب</label>
+            <input className={inputCls} dir="ltr" value={bankAccount} onChange={(e) => setBankAccount(e.target.value)} placeholder="مثلاً 0103280768005" />
+          </div>
+          <div>
+            <label className={labelCls}>نام بانک</label>
+            <input className={inputCls} value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="مثلاً بانک ملی" />
+          </div>
+          <div>
+            <label className={labelCls}>نام صاحب حساب</label>
+            <input className={inputCls} value={accountHolder} onChange={(e) => setAccountHolder(e.target.value)} placeholder="مثلاً شهرام گیوی" />
+          </div>
+          <div>
+            <label className={labelCls}>کد ملی صاحب حساب</label>
+            <input className={inputCls} dir="ltr" value={accountNationalId} onChange={(e) => setAccountNationalId(e.target.value)} placeholder="مثلاً 1287021247" />
+          </div>
+        </div>
+        <div className="mt-4">
+          <AdminButton onClick={saveBankInfo} disabled={saving}>
+            {saving ? 'در حال ذخیره...' : 'ذخیره اطلاعات حساب بانکی'}
           </AdminButton>
         </div>
       </AdminPanel>

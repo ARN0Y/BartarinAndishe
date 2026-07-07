@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { normalizeAcademicYear } from '@/lib/academicYear'
 import { formatCurrency } from '@/lib/formatters'
 import { rialToWords } from '@/lib/numberToWords'
+import { onlyEnglishDigits } from '@/lib/digits'
+import { tuitionContractMeta } from '@/data/tuitionContractMeta'
 
 export const CONTRACT_SETTINGS_PREFIX = 'contractSettings:'
 
@@ -23,7 +25,16 @@ const DEFAULTS = {
   uniformGirlFromToman: '',
   uniformGirlToToman: '',
   bagSetToman: '',
+  // اطلاعات حساب بانکی — پیش‌فرض از ثابت‌های قرارداد؛ قابل‌ویرایش توسط مدیر
+  bankAccount: tuitionContractMeta.bankAccount,
+  bankName: tuitionContractMeta.bankName,
+  accountHolder: tuitionContractMeta.accountHolder,
+  accountNationalId: tuitionContractMeta.accountNationalId,
 }
+
+// فیلدهای متنی حساب (نام بانک/صاحب حساب) و عددی (شماره حساب/کدملی)
+const BANK_TEXT_FIELDS = ['bankName', 'accountHolder']
+const BANK_DIGIT_FIELDS = ['bankAccount', 'accountNationalId']
 
 const TOMAN_FIELDS = [
   'uniformBoyToman', 'uniformGirlToman', 'bagSetToman',
@@ -77,6 +88,16 @@ export async function saveContractSettings(academicYear, payload) {
   for (const field of TOMAN_FIELDS) {
     next[field] = payload[field] !== undefined
       ? String(payload[field] || '').replace(/\D/g, '')
+      : current[field]
+  }
+  for (const field of BANK_TEXT_FIELDS) {
+    next[field] = payload[field] !== undefined
+      ? String(payload[field] || '').trim()
+      : current[field]
+  }
+  for (const field of BANK_DIGIT_FIELDS) {
+    next[field] = payload[field] !== undefined
+      ? onlyEnglishDigits(payload[field])
       : current[field]
   }
 

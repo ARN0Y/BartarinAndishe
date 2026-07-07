@@ -7,6 +7,7 @@ import { getContractSettings } from '@/lib/services/contractSettingsService'
 import { getContractArticles } from '@/lib/services/contractArticlesService'
 import { formatFinancialPlanForApi, getFinancialPlan } from '@/lib/services/financialPlanService'
 import { syncFinancialPlanToInvoice } from '@/lib/services/contractInvoiceSync'
+import { verifyContractOtp, clearContractOtp, signerPhoneOf } from '@/lib/services/contractOtpService'
 import { dateToJalali } from '@/lib/jalali'
 import { SIGNER_ROLES } from '@/data/tuitionContractMeta'
 
@@ -123,6 +124,7 @@ export async function POST(request) {
     const workshopConsent = Boolean(body.workshopConsent)
     const contractAccepted = Boolean(body.contractAccepted)
     const amanatCommitmentAccepted = Boolean(body.amanatCommitmentAccepted)
+    const otpCode = String(body.otpCode || '').trim()
 
     if (!contractAccepted) {
       return Response.json({ message: 'پذیرش متن قرارداد الزامی است.' }, { status: 400 })
@@ -190,6 +192,10 @@ export async function POST(request) {
       )
     }
 
+    // تأیید کد پیامکی امضاکننده — آخرین دروازه پیش از ثبت قرارداد.
+    // چالش فقط اعتبارسنجی می‌شود؛ حذف آن درون تراکنش انجام می‌گیرد.
+    await verifyContractOtp(studentId, signerPhoneOf(profile, signerRole), otpCode)
+
     const contractDate = dateToJalali(new Date())
     const planForBuilder = formatFinancialPlanForApi(financialPlan)
     const customArticles = await getContractArticles()
@@ -222,6 +228,7 @@ export async function POST(request) {
       })
 
       await syncFinancialPlanToInvoice(tx, studentId, planWithLines)
+      await clearContractOtp(studentId, tx)
 
       return created
     })

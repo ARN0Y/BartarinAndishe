@@ -1,7 +1,14 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { onlyEnglishDigits } from '@/lib/digits'
 import TuitionContractDocument from './TuitionContractDocument'
+
+function maskPhone(p) {
+  const s = String(p || '')
+  if (s.length < 8) return s
+  return `${s.slice(0, 4)}***${s.slice(-4)}`
+}
 
 export default function TuitionContractPanel({ profileCompleted, onSigned }) {
   const [loading, setLoading] = useState(true)
@@ -17,6 +24,11 @@ export default function TuitionContractPanel({ profileCompleted, onSigned }) {
   const [submitting, setSubmitting] = useState(false)
   const [parentSignatureUrl, setParentSignatureUrl] = useState('')
   const [uploadingSignature, setUploadingSignature] = useState(false)
+  const [otpSent, setOtpSent] = useState(false)
+  const [otpCode, setOtpCode] = useState('')
+  const [sendingOtp, setSendingOtp] = useState(false)
+  const [otpPhone, setOtpPhone] = useState('')
+  const [otpNote, setOtpNote] = useState('')
   const [settingsConfigured, setSettingsConfigured] = useState(true)
   const [financialPlanReady, setFinancialPlanReady] = useState(false)
 
@@ -63,7 +75,13 @@ export default function TuitionContractPanel({ profileCompleted, onSigned }) {
   }, [signerRole, signed, load])
 
   useEffect(() => {
-    if (!signed) setParentSignatureUrl('')
+    if (!signed) {
+      setParentSignatureUrl('')
+      setOtpSent(false)
+      setOtpCode('')
+      setOtpPhone('')
+      setOtpNote('')
+    }
   }, [signerRole, signed])
 
   const displayFields = useMemo(() => {
@@ -114,18 +132,56 @@ export default function TuitionContractPanel({ profileCompleted, onSigned }) {
     }
   }
 
+  function validateBeforeSign() {
+    if (!parentSignatureUrl) return 'لطفاً تصویر امضا را بارگذاری کنید.'
+    if (!workshopConsent || !contractAccepted) return 'پذیرش هر دو مورد پایین قرارداد الزامی است.'
+    if (displayFields?.hasAmanatChecks && !amanatCommitmentAccepted) {
+      return 'پذیرش تعهد پرداخت نقدی چک(های) امانت الزامی است.'
+    }
+    return ''
+  }
+
+  async function sendOtp() {
+    const validationError = validateBeforeSign()
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+    setSendingOtp(true)
+    setError('')
+    setOtpNote('')
+    try {
+      const res = await fetch('/api/parent/contract/otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signerRole }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.message || 'خطا در ارسال کد تایید')
+      setOtpSent(true)
+      setOtpCode('')
+      setOtpPhone(json.phone || '')
+      if (json.devCode) {
+        setOtpNote(`کد تست (فقط در محیط توسعه): ${json.devCode}`)
+      } else if (!json.otpSent) {
+        setOtpNote('ارسال پیامک ممکن است با تأخیر انجام شود؛ اگر کد نرسید، «ارسال مجدد کد» را بزنید.')
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSendingOtp(false)
+    }
+  }
+
   async function handleSign(e) {
     e.preventDefault()
-    if (!parentSignatureUrl) {
-      setError('لطفاً تصویر امضا را بارگذاری کنید.')
+    const validationError = validateBeforeSign()
+    if (validationError) {
+      setError(validationError)
       return
     }
-    if (!workshopConsent || !contractAccepted) {
-      setError('پذیرش هر دو مورد پایین قرارداد الزامی است.')
-      return
-    }
-    if (displayFields?.hasAmanatChecks && !amanatCommitmentAccepted) {
-      setError('پذیرش تعهد پرداخت نقدی چک(های) امانت الزامی است.')
+    if (!otpCode.trim()) {
+      setError('کد تایید پیامکی را وارد کنید.')
       return
     }
     setSubmitting(true)
@@ -140,6 +196,7 @@ export default function TuitionContractPanel({ profileCompleted, onSigned }) {
           contractAccepted,
           amanatCommitmentAccepted,
           parentSignatureUrl,
+          otpCode: otpCode.trim(),
         }),
       })
       const json = await res.json()
@@ -320,24 +377,66 @@ export default function TuitionContractPanel({ profileCompleted, onSigned }) {
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <button
-              type="submit"
-              disabled={submitting || !workshopConsent || !contractAccepted || !parentSignatureUrl || !settingsConfigured || !financialPlanReady || (displayFields?.hasAmanatChecks && !amanatCommitmentAccepted)}
-              className="rounded-2xl bg-gradient-to-l from-pink-deep to-rose px-6 py-3 text-sm font-bold text-white shadow-md transition hover:opacity-95 disabled:opacity-50"
-            >
-              {submitting ? 'در حال ثبت...' : 'تأیید و ثبت قرارداد'}
-            </button>
-            <div
-              className="flex items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-400"
-              aria-hidden
-            >
-              <svg className="h-5 w-5 shrink-0 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-              </svg>
-              <span>پس از ثبت، قرارداد قابل چاپ می‌شود و مبالغ به فاکتور منتقل می‌گردد</span>
+          {!otpSent ? (
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <button
+                type="button"
+                onClick={sendOtp}
+                disabled={sendingOtp || !workshopConsent || !contractAccepted || !parentSignatureUrl || !settingsConfigured || !financialPlanReady || (displayFields?.hasAmanatChecks && !amanatCommitmentAccepted)}
+                className="rounded-2xl bg-gradient-to-l from-pink-deep to-rose px-6 py-3 text-sm font-bold text-white shadow-md transition hover:opacity-95 disabled:opacity-50"
+              >
+                {sendingOtp ? 'در حال ارسال کد...' : 'دریافت کد تایید پیامکی'}
+              </button>
+              <div
+                className="flex items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-400"
+                aria-hidden
+              >
+                <svg className="h-5 w-5 shrink-0 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                <span>برای تأیید هویت، کد پیامکی به موبایل امضاکننده ارسال می‌شود</span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-4 rounded-xl border border-pink-deep/20 bg-pink-soft/20 p-4">
+              <div>
+                <p className="text-sm font-extrabold text-navy">کد تایید پیامکی</p>
+                <p className="mt-1 text-xs leading-6 text-slate-muted">
+                  کد ۶ رقمی ارسال‌شده به شمارهٔ{' '}
+                  <span dir="ltr" className="font-bold text-navy">{maskPhone(otpPhone)}</span>{' '}
+                  را وارد کنید.
+                </p>
+              </div>
+              <input
+                value={otpCode}
+                onChange={(e) => setOtpCode(onlyEnglishDigits(e.target.value).slice(0, 6))}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                dir="ltr"
+                placeholder="- - - - - -"
+                className="w-full max-w-xs rounded-xl border border-navy/15 bg-white px-4 py-3 text-center text-lg font-bold tracking-[0.4em] text-navy focus:border-pink-deep focus:outline-none"
+              />
+              {otpNote ? <p className="text-xs font-semibold text-amber-700">{otpNote}</p> : null}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <button
+                  type="submit"
+                  disabled={submitting || otpCode.trim().length < 6 || !settingsConfigured || !financialPlanReady}
+                  className="rounded-2xl bg-gradient-to-l from-pink-deep to-rose px-6 py-3 text-sm font-bold text-white shadow-md transition hover:opacity-95 disabled:opacity-50"
+                >
+                  {submitting ? 'در حال ثبت...' : 'ثبت و امضای نهایی قرارداد'}
+                </button>
+                <button
+                  type="button"
+                  onClick={sendOtp}
+                  disabled={sendingOtp}
+                  className="text-xs font-bold text-pink-deep underline underline-offset-4 hover:text-rose disabled:opacity-50"
+                >
+                  {sendingOtp ? 'در حال ارسال...' : 'ارسال مجدد کد'}
+                </button>
+              </div>
+              <p className="text-xs text-slate-400">پس از ثبت، قرارداد قابل چاپ می‌شود و مبالغ به فاکتور منتقل می‌گردد.</p>
+            </div>
+          )}
         </form>
       )}
 

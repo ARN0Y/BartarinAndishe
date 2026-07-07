@@ -51,6 +51,7 @@ model Student {
   tuitionContract    TuitionContract?
   financialPlan      StudentFinancialPlan?
   excursionConsents  ExcursionConsent[]
+  otpChallenges      OtpChallenge[]
 
   @@unique([nationalId, academicYear])
   @@unique([studentCode, academicYear])
@@ -547,5 +548,23 @@ model ExcursionConsent {
 
   @@unique([excursionId, studentId])
   @@index([excursionId])
+  @@index([studentId])
+}
+
+// چالش کد تایید پیامکی (OTP) عمومی و کوتاه‌عمر — مثلاً برای امضای قرارداد شهریه
+// یک رکورد فعال به‌ازای هر (studentId, purpose)؛ پس از مصرف حذف می‌شود.
+model OtpChallenge {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  purpose   String // مثلاً "contract"
+  phone     String
+  otpHash   String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, purpose])
   @@index([studentId])
 }
