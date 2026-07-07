@@ -51,6 +51,13 @@ export default function LoginForm({ type, redirectTo }) {
   async function submit(event) {
     event.preventDefault()
     setError('')
+    setNotice('')
+
+    if (!isAdmin && form.nationalId.length !== 10) {
+      setError('کد ملی ۱۰ رقمی نوآموز را کامل وارد کنید، سپس رمز عبور را بزنید.')
+      return
+    }
+
     setLoading(true)
 
     const endpoint = isAdmin ? '/api/auth/admin/login' : '/api/auth/parent/login'
@@ -152,7 +159,7 @@ export default function LoginForm({ type, redirectTo }) {
 
           <Button
             type="submit"
-            disabled={loading || (!isAdmin && form.nationalId.length !== 10)}
+            disabled={loading}
             className="w-full h-11 bg-pink-deep hover:bg-rose text-white"
           >
             {loading ? (

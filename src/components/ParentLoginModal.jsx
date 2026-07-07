@@ -132,7 +132,7 @@ export default function ParentLoginModal({ onClose }) {
 
           <button
             type="submit"
-            disabled={loading || nationalId.length !== 10}
+            disabled={loading}
             className="mt-5 w-full rounded-lg bg-pink-deep py-3.5 text-sm font-extrabold text-white shadow-sm transition hover:bg-rose disabled:opacity-50"
           >
             {loading ? 'در حال ورود...' : 'ورود به پنل اولیا'}
