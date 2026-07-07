@@ -2,7 +2,7 @@ import crypto from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { AppError } from '@/lib/errors'
-import { onlyEnglishDigits } from '@/lib/digits'
+import { onlyEnglishDigits, toEnglishDigits } from '@/lib/digits'
 
 /** بازنشانی رمز والد به کد ملی نوآموز (فراموشی رمز) — رمز سفارشی پاک می‌شود */
 export async function resetParentPasswordToNationalId(nationalId) {
@@ -30,9 +30,9 @@ export function passwordFingerprint(password) {
   return crypto.createHash('sha256').update(String(password)).digest('hex')
 }
 
-/** اعتبارسنجی رمز جدید انتخابی والد */
+/** اعتبارسنجی رمز جدید انتخابی والد — ارقام به انگلیسی نرمالایز می‌شوند تا «۱۲۳» و «123» یکسان باشند */
 export function validateNewPassword(password) {
-  const value = String(password || '')
+  const value = toEnglishDigits(String(password || ''))
   if (value.length < 6) throw new AppError(422, 'رمز عبور باید حداقل ۶ کاراکتر باشد.')
   if (!ALLOWED_RE.test(value)) throw new AppError(422, 'رمز عبور فقط می‌تواند شامل حروف و اعداد باشد.')
   if (!LETTER_RE.test(value) || !DIGIT_RE.test(value)) {
@@ -47,10 +47,15 @@ export function validateNewPassword(password) {
  */
 export async function verifyParentPassword(student, password) {
   const provided = String(password ?? '')
+  // ارقام فارسی/عربی به انگلیسی نرمالایز می‌شوند تا کاربر با هر نوع کیبورد بتواند وارد شود.
+  const normalized = toEnglishDigits(provided)
   if (!student.parentPasswordHash) {
-    return provided === String(student.nationalId)
+    return normalized === String(student.nationalId)
   }
-  return bcrypt.compare(provided, student.parentPasswordHash)
+  if (await bcrypt.compare(normalized, student.parentPasswordHash)) return true
+  // سازگاری با رمزهای قدیمی که پیش از نرمال‌سازی، با ارقام فارسی ذخیره شده‌اند
+  if (normalized !== provided && await bcrypt.compare(provided, student.parentPasswordHash)) return true
+  return false
 }
 
 export function hasCustomPassword(student) {
