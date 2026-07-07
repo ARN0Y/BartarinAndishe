@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import NationalIdPinInput from '@/components/ui/NationalIdPinInput'
 
+const LS_KEY = 'bartarin_saved_nid'
+
 export default function ParentLoginModal({ onClose }) {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
@@ -38,6 +40,11 @@ export default function ParentLoginModal({ onClose }) {
 
   useEffect(() => {
     setMounted(true)
+    // کد ملی آخرین ورود را به‌خاطر می‌سپاریم تا والدین فقط رمز را وارد کنند.
+    try {
+      const saved = localStorage.getItem(LS_KEY)
+      if (saved && /^\d{10}$/.test(saved)) setNationalId(saved)
+    } catch {}
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = prev }
@@ -46,7 +53,7 @@ export default function ParentLoginModal({ onClose }) {
   async function submit(e) {
     e.preventDefault()
     if (nationalId.length !== 10) {
-      setError('کد ملی باید ۱۰ رقم باشد.')
+      setError('کد ملی ۱۰ رقمی نوآموز را کامل وارد کنید، سپس رمز عبور را بزنید.')
       return
     }
     setError('')
@@ -59,6 +66,7 @@ export default function ParentLoginModal({ onClose }) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'خطا در ورود')
+      try { localStorage.setItem(LS_KEY, nationalId) } catch {}
       onClose()
       router.push('/payment/parent/dashboard?tab=profile')
       router.refresh()

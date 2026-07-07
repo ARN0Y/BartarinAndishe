@@ -41,10 +41,14 @@ export default function LoginForm({ type, redirectTo }) {
     }
   }
 
+  // کد ملی آخرین ورود را به‌خاطر می‌سپاریم تا والدین فقط رمز را وارد کنند.
   useEffect(() => {
     if (isAdmin) return
     try {
-      localStorage.removeItem(LS_KEY)
+      const saved = localStorage.getItem(LS_KEY)
+      if (saved && /^\d{10}$/.test(saved)) {
+        setForm((v) => ({ ...v, nationalId: saved }))
+      }
     } catch {}
   }, [isAdmin])
 
@@ -74,6 +78,9 @@ export default function LoginForm({ type, redirectTo }) {
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'خطا در ورود')
 
+      if (!isAdmin) {
+        try { localStorage.setItem(LS_KEY, form.nationalId) } catch {}
+      }
       router.push(redirectTo ?? (isAdmin ? '/admin/dashboard' : '/payment/parent/dashboard?tab=profile'))
       router.refresh()
     } catch (err) {
