@@ -1,9 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { INTERACTIVE_WORKSHEETS } from '@/data/interactiveWorksheets'
 import StudentProfileForm from './StudentProfileForm'
 import TuitionContractPanel from './TuitionContractPanel'
 import ParentPasswordCard from './ParentPasswordCard'
@@ -29,7 +27,7 @@ import {
   UserCircle, FileSignature, Wallet, BookOpen, Inbox,
   FileText, Lock, Check, ChevronLeft, RefreshCw,
   ReceiptText, ShieldCheck, ClipboardCheck, MailOpen, Download,
-  Gamepad2, ExternalLink, CircleDollarSign, LayoutDashboard, Settings,
+  CircleDollarSign, LayoutDashboard, Settings,
   ArrowLeft, Tent,
 } from 'lucide-react'
 
@@ -60,7 +58,7 @@ const TAB_SUBTITLE = {
   profile: 'تکمیل و مشاهدهٔ اطلاعات نوآموز',
   contract: 'مطالعه و امضای قرارداد شهریه',
   finance: 'فاکتور، اقساط و پرداخت‌ها',
-  worksheets: 'کاربرگ‌ها و تمرین‌های تعاملی',
+  worksheets: 'کاربرگ‌ها',
   messages: 'صندوق پیام‌های مدیریت',
   excursions: 'رضایت‌نامه و پرداخت اردوها',
   settings: 'مدیریت رمز عبور و حساب',
@@ -326,9 +324,6 @@ export default function ParentDashboardClient() {
   const studentFullName = `${student.firstName} ${student.lastName}`
   const invoice = data?.invoice
   const worksheets = data?.worksheets ?? []
-  const visibleInteractiveSlugs = data?.visibleInteractiveSlugs ?? []
-  const spotDifferenceGames = data?.spotDifferenceGames ?? []
-  const matchingGames = data?.matchingGames ?? []
   const schedules = invoice?.schedules ?? data?.schedules ?? []
   const profileCompleted = profileData?.profile?.profileCompleted
   const studentPhoto = profileData?.profile?.photoUrl
@@ -427,12 +422,7 @@ export default function ParentDashboardClient() {
       )}
 
       {activeTab === 'worksheets' && contractSigned && (
-        <WorksheetsList
-          worksheets={worksheets}
-          visibleInteractiveSlugs={visibleInteractiveSlugs}
-          spotDifferenceGames={spotDifferenceGames}
-          matchingGames={matchingGames}
-        />
+        <WorksheetsList worksheets={worksheets} />
       )}
 
       {activeTab === 'messages' && contractSigned && (
@@ -845,139 +835,55 @@ function InvoiceView({ invoice, schedules = [] }) {
   )
 }
 
-function WorksheetsList({ worksheets, visibleInteractiveSlugs = [], spotDifferenceGames = [], matchingGames = [] }) {
-  const visibleInteractive = INTERACTIVE_WORKSHEETS.filter((item) =>
-    visibleInteractiveSlugs.includes(item.id),
-  )
-  const hasInteractive = visibleInteractive.length > 0 || spotDifferenceGames.length > 0 || matchingGames.length > 0
-  const hasFile = worksheets.length > 0
-
-  if (!hasInteractive && !hasFile) {
+function WorksheetsList({ worksheets }) {
+  if (worksheets.length === 0) {
     return (
       <Card className="rounded-lg">
         <CardContent className="flex flex-col items-center justify-center p-10 text-center">
           <BookOpen className="h-10 w-10 text-muted-foreground/45" strokeWidth={1.5} />
           <p className="mt-3 text-sm font-bold text-foreground">هنوز کاربرگی فعال نشده است</p>
-          <p className="mt-1 text-xs leading-6 text-muted-foreground">بعد از فعال‌سازی توسط مدیریت، فایل‌ها و تمرین‌های تعاملی اینجا نمایش داده می‌شوند.</p>
+          <p className="mt-1 text-xs leading-6 text-muted-foreground">بعد از فعال‌سازی توسط مدیریت، فایل‌های آموزشی اینجا نمایش داده می‌شوند.</p>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {hasInteractive ? (
-        <Card className="rounded-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Gamepad2 className="h-5 w-5" />
-              کاربرگ‌های تعاملی
-            </CardTitle>
-            <CardDescription>تمرین‌هایی که مستقیم در مرورگر اجرا می‌شوند.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              {visibleInteractive.map((item) => (
-                <InteractiveWorksheetCard key={item.id} item={item} />
-              ))}
-              {spotDifferenceGames.map((game) => (
-                <SpotDifferenceWorksheetCard key={game.id} game={game} />
-              ))}
-              {matchingGames.map((game) => (
-                <MatchingWorksheetCard key={game.id} game={game} />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {hasFile ? (
-        <Card className="rounded-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <FileText className="h-5 w-5" />
-              کاربرگ‌های فایلی
-            </CardTitle>
-            <CardDescription>فایل‌های PDF یا تصویر برای دانلود و مشاهده.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              {worksheets.map((item) => (
-                <WorksheetCard key={item.id} worksheet={item} />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
-    </div>
-  )
-}
-
-function WorksheetSurface({ badge, title, description, href, tone = 'default' }) {
-  const toneCls = {
-    default: 'border-border bg-card',
-    amber: 'border-amber-200 bg-amber-50/45 dark:border-amber-900/60 dark:bg-amber-950/20',
-    violet: 'border-violet-200 bg-violet-50/45 dark:border-violet-900/60 dark:bg-violet-950/20',
-    emerald: 'border-emerald-200 bg-emerald-50/45 dark:border-emerald-900/60 dark:bg-emerald-950/20',
-  }[tone]
-
-  return (
-    <article className={cn('rounded-lg border p-5 transition-colors hover:bg-muted/35', toneCls)}>
-      <Badge variant={tone === 'amber' ? 'warning' : tone === 'emerald' ? 'success' : tone === 'violet' ? 'info' : 'secondary'}>{badge}</Badge>
-      <h3 className="mt-3 text-base font-bold text-foreground">{title}</h3>
-      <p className="mt-2 min-h-12 text-sm leading-7 text-muted-foreground">{description}</p>
-      <Button asChild className="mt-4" size="sm">
-        <Link href={href}>
-          شروع تمرین
-          <ExternalLink className="h-3.5 w-3.5" />
-        </Link>
-      </Button>
-    </article>
-  )
-}
-
-function SpotDifferenceWorksheetCard({ game }) {
-  return (
-    <WorksheetSurface
-      badge="پیدا کردن تفاوت"
-      title={game.title}
-      description={game.description || ((game.stageCount || 0) + ' مرحله - تفاوت‌ها را با دقت پیدا کن.')}
-      href={`/payment/parent/worksheets/spot/${game.slug}`}
-      tone="amber"
-    />
-  )
-}
-
-function MatchingWorksheetCard({ game }) {
-  return (
-    <WorksheetSurface
-      badge="وصل‌کردنی"
-      title={game.title}
-      description={game.description || ((game.stageCount || 0) + ' مرحله - ' + (game.pairCount || 0) + ' جفت تصویر')}
-      href={`/payment/parent/worksheets/match/${game.slug}`}
-      tone="violet"
-    />
-  )
-}
-
-function InteractiveWorksheetCard({ item }) {
-  return (
-    <WorksheetSurface
-      badge={item.badge}
-      title={item.title}
-      description={item.description}
-      href={item.href}
-      tone="emerald"
-    />
+    <Card className="rounded-lg">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <FileText className="h-5 w-5" />
+          کاربرگ‌ها
+        </CardTitle>
+        <CardDescription>فایل‌های آموزشی (عکس، PDF، فیلم) برای مشاهده و دانلود.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4 md:grid-cols-2">
+          {worksheets.map((item) => (
+            <WorksheetCard key={item.id} worksheet={item} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
 function WorksheetCard({ worksheet }) {
+  const mime = worksheet.mimeType || ''
+  const isImage = mime.startsWith('image/')
+  const isVideo = mime.startsWith('video/')
   return (
     <article className="rounded-lg border border-border bg-card p-5 transition-colors hover:bg-muted/35">
       <Badge variant="secondary">{worksheet.createdAtFormatted}</Badge>
       <h3 className="mt-3 text-base font-bold text-foreground">{worksheet.title}</h3>
       <p className="mt-2 text-sm leading-7 text-muted-foreground">{worksheet.description}</p>
+      {isImage ? (
+        <img src={worksheet.fileUrl} alt={worksheet.title} loading="lazy"
+          className="mt-3 max-h-64 w-full rounded-lg border border-border bg-muted/30 object-contain" />
+      ) : isVideo ? (
+        <video src={worksheet.fileUrl} controls preload="metadata"
+          className="mt-3 max-h-64 w-full rounded-lg border border-border bg-black" />
+      ) : null}
       <Button asChild variant="outline" size="sm" className="mt-4">
         <a href={worksheet.fileUrl} target="_blank" rel="noopener noreferrer">
           <Download className="h-3.5 w-3.5" />

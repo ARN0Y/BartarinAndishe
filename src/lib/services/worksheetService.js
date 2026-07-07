@@ -5,14 +5,18 @@ import { writeFile, mkdir, unlink } from 'fs/promises'
 import path from 'path'
 
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads', 'worksheets')
-const MAX_FILE_SIZE = 10 * 1024 * 1024
+const MAX_IMAGE_DOC_SIZE = 10 * 1024 * 1024 // عکس/PDF: ۱۰ مگابایت
+const MAX_VIDEO_SIZE = 60 * 1024 * 1024 // فیلم: ۶۰ مگابایت
+// کاربرگ‌های فایلی: فقط عکس، PDF و فیلم
 const ALLOWED_TYPES = new Map([
   ['application/pdf', new Set(['.pdf'])],
   ['image/jpeg', new Set(['.jpg', '.jpeg'])],
   ['image/jpg', new Set(['.jpg', '.jpeg'])],
   ['image/png', new Set(['.png'])],
   ['image/webp', new Set(['.webp'])],
-  ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', new Set(['.docx'])],
+  ['video/mp4', new Set(['.mp4'])],
+  ['video/webm', new Set(['.webm'])],
+  ['video/quicktime', new Set(['.mov'])],
 ])
 
 function validateWorksheetFile(file) {
@@ -25,11 +29,13 @@ function validateWorksheetFile(file) {
   const allowedExtensions = ALLOWED_TYPES.get(mimeType)
 
   if (!allowedExtensions?.has(ext)) {
-    throw new AppError(400, 'فرمت فایل مجاز نیست. (PDF, JPG, PNG, WEBP, DOCX)')
+    throw new AppError(400, 'فرمت فایل مجاز نیست. (عکس: JPG/PNG/WEBP، سند: PDF، فیلم: MP4/WEBM/MOV)')
   }
 
-  if (file.size > MAX_FILE_SIZE) {
-    throw new AppError(400, 'حداکثر حجم فایل ۱۰ مگابایت است.')
+  const isVideo = mimeType.startsWith('video/')
+  const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_DOC_SIZE
+  if (file.size > maxSize) {
+    throw new AppError(400, isVideo ? 'حداکثر حجم فیلم ۶۰ مگابایت است.' : 'حداکثر حجم فایل ۱۰ مگابایت است.')
   }
 
   return { ext, mimeType }

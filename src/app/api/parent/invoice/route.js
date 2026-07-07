@@ -2,8 +2,6 @@ import { requireParent } from '@/lib/api/guards'
 import { jsonError } from '@/lib/errors'
 import { getStudentInvoice } from '@/lib/services/manualPaymentService'
 import { listWorksheets } from '@/lib/services/worksheetService'
-import { listSpotDifferenceGames } from '@/lib/services/spotDifferenceService'
-import { listMatchingGames } from '@/lib/services/matchingGameService'
 import { prisma } from '@/lib/prisma'
 
 export async function GET() {
@@ -19,23 +17,13 @@ export async function GET() {
       )
     }
 
-    const [invoice, worksheets, interactiveCodes, spotDifferenceGames, matchingGames] = await Promise.all([
+    const [invoice, worksheets] = await Promise.all([
       getStudentInvoice(studentId),
       listWorksheets({ visibleOnly: true }),
-      prisma.interactiveCode.findMany({
-        where: { isVisible: true },
-        select: { slug: true },
-        orderBy: { slug: 'asc' },
-      }),
-      listSpotDifferenceGames({ visibleOnly: true }),
-      listMatchingGames({ visibleOnly: true }),
     ])
     return Response.json({
       invoice,
       worksheets,
-      visibleInteractiveSlugs: interactiveCodes.map((c) => c.slug),
-      spotDifferenceGames,
-      matchingGames,
       schedules: invoice.schedules,
     })
   } catch (error) {

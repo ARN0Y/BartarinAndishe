@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { INTERACTIVE_WORKSHEETS } from '@/data/interactiveWorksheets'
 import JalaliDatePicker from '@/components/ui/JalaliDatePicker'
 import AdminProfileView from './AdminProfileView'
 import { rialToTomanWords } from '@/lib/numberToWords'
@@ -15,8 +14,6 @@ import {
 import AdminSearchInput from '@/components/admin/AdminSearchInput'
 import AdminAcademicYearBar from '@/components/admin/AdminAcademicYearBar'
 import AdminContractSettingsPanel from '@/components/admin/AdminContractSettingsPanel'
-import AdminSpotDifferencePanel from '@/components/admin/AdminSpotDifferencePanel'
-import AdminMatchingPanel from '@/components/admin/AdminMatchingPanel'
 import AdminClassesPanel from '@/components/admin/AdminClassesPanel'
 import AdminExcursionsPanel from '@/components/admin/AdminExcursionsPanel'
 import AdminSiteContentPanel from '@/components/admin/AdminSiteContentPanel'
@@ -51,7 +48,7 @@ import { cn } from '@/lib/utils'
 import {
   ClipboardList, CheckCircle2, Wallet, Users, Clock, AlertTriangle,
   TrendingUp, ChevronLeft, Mail, Megaphone, BookOpen, FileText,
-  MessageSquare, ArrowLeft, CircleDollarSign, Receipt, Gamepad2,
+  MessageSquare, ArrowLeft, CircleDollarSign, Receipt,
 } from 'lucide-react'
 
 function formatThousands(val) {
@@ -236,7 +233,6 @@ export default function AdminDashboardClient() {
   )
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [worksheets, setWorksheets] = useState([])
-  const [interactiveCodes, setInteractiveCodes] = useState([])
   const [form, setForm] = useState({ title: '', description: '', file: null })
   const [editing, setEditing] = useState(null)
   const [error, setError] = useState('')
@@ -347,20 +343,16 @@ export default function AdminDashboardClient() {
   }
 
   async function load() {
-    const [studentsRes, worksheetRes, codesRes] = await Promise.all([
+    const [studentsRes, worksheetRes] = await Promise.all([
       fetch(`/api/admin/students?${yearQs}`),
       fetch('/api/worksheets'),
-      fetch('/api/admin/interactive-codes'),
     ])
     const studentsJson = await studentsRes.json()
     const worksheetJson = await worksheetRes.json()
-    const codesJson = await codesRes.json()
     if (!studentsRes.ok) setError(studentsJson.message)
     const list = studentsJson.students || []
     setStudents(list)
     setWorksheets(worksheetJson.worksheets || [])
-    const codes = codesJson.codes || []
-    setInteractiveCodes(codes)
     if (selectedStudent) {
       const updated = list.find((s) => s.studentId === selectedStudent.studentId)
       if (updated) setSelectedStudent(updated)
@@ -629,20 +621,6 @@ export default function AdminDashboardClient() {
     if (!confirm('این پرداخت حذف شود؟')) return
     await fetch(`/api/admin/manual-payments/${paymentId}`, { method: 'DELETE' })
     load()
-  }
-
-  async function toggleInteractiveVisibility(iw, isVisible) {
-    setVisibilitySaving(iw.id)
-    try {
-      await fetch('/api/admin/interactive-codes', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: iw.id, title: iw.title, isVisible }),
-      })
-      await load()
-    } finally {
-      setVisibilitySaving(null)
-    }
   }
 
   async function toggleWorksheetVisibility(id, isVisible) {
@@ -1389,48 +1367,8 @@ export default function AdminDashboardClient() {
         <section className="space-y-6">
           <AdminPageHeader
             title="کاربرگ‌ها"
-            description="مدیریت محتوای آموزشی تعاملی و فایلی و تعیین نمایش در پنل والدین"
+            description="مدیریت کاربرگ‌های فایلی (عکس، PDF، فیلم) و تعیین نمایش در پنل والدین"
           />
-
-          {/* کاربرگ‌های تعاملی */}
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <Gamepad2 className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-bold text-foreground">کاربرگ‌های تعاملی</h2>
-              <Badge variant="secondary">{INTERACTIVE_WORKSHEETS.length.toLocaleString('fa-IR')}</Badge>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {INTERACTIVE_WORKSHEETS.map((iw) => {
-                const existing = interactiveCodes.find((c) => c.slug === iw.id)
-                const isVisible = existing?.isVisible ?? false
-                return (
-                  <Card key={iw.id} className="rounded-xl">
-                    <CardContent className="p-5">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="font-bold text-foreground">{iw.title}</p>
-                        <Badge variant={isVisible ? 'success' : 'secondary'}>{isVisible ? 'فعال' : 'غیرفعال'}</Badge>
-                      </div>
-                      <p className="mt-1.5 min-h-9 text-xs leading-6 text-muted-foreground">{iw.description}</p>
-                      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-                        <span className="text-xs font-semibold text-foreground">نمایش در پنل والدین</span>
-                        <Switch
-                          checked={isVisible}
-                          disabled={visibilitySaving === iw.id}
-                          onCheckedChange={(val) => toggleInteractiveVisibility(iw, val)}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* بازی پیدا کردن تفاوت */}
-          <AdminSpotDifferencePanel />
-
-          {/* بازی وصل‌کردنی */}
-          <AdminMatchingPanel />
 
           {/* کاربرگ‌های فایلی */}
           <div>
@@ -1469,11 +1407,12 @@ export default function AdminDashboardClient() {
                         <label className={labelCls}>فایل {editing ? '(در صورت تغییر)' : <span className="text-red-500">*</span>}</label>
                         <input
                           type="file"
-                          accept=".pdf,image/*,.docx"
+                          accept=".pdf,image/*,video/mp4,video/webm,video/quicktime"
                           onChange={(e) => setForm((v) => ({ ...v, file: e.target.files?.[0] }))}
                           className={`${inputCls} h-auto py-2 file:ml-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1 file:text-xs file:font-semibold`}
                           required={!editing}
                         />
+                        <p className="mt-1 text-xs text-muted-foreground">عکس (JPG/PNG/WEBP) یا PDF تا ۱۰ مگابایت، یا فیلم (MP4/WEBM/MOV) تا ۶۰ مگابایت</p>
                       </div>
                     </div>
                     <div className="mt-4 flex gap-2">
