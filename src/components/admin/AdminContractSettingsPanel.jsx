@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { rialToTomanWords } from '@/lib/numberToWords'
+import { tuitionContractMeta } from '@/data/tuitionContractMeta'
 import {
   AdminPageHeader, AdminPanel, AdminButton, inputCls, labelCls,
 } from '@/components/admin/ui/AdminUI'
@@ -142,6 +143,13 @@ export default function AdminContractSettingsPanel({ academicYear }) {
     } finally {
       setSaving(false)
     }
+  }
+
+  function fillBankDefaults() {
+    setBankAccount(tuitionContractMeta.bankAccount)
+    setBankName(tuitionContractMeta.bankName)
+    setAccountHolder(tuitionContractMeta.accountHolder)
+    setAccountNationalId(tuitionContractMeta.accountNationalId)
   }
 
   async function saveBankInfo() {
@@ -287,28 +295,35 @@ export default function AdminContractSettingsPanel({ academicYear }) {
 
       <AdminPanel>
         <h3 className="mb-1 text-sm font-bold text-slate-800">اطلاعات حساب بانکی (بند واریز شهریه)</h3>
-        <p className="mb-4 text-xs text-slate-500">این اطلاعات در متن قرارداد برای واریز شهریه نمایش داده می‌شود. اگر خالی بماند، مقدار پیش‌فرض قرارداد استفاده می‌شود.</p>
+        <p className="mb-4 text-xs text-slate-500">این اطلاعات در متن قرارداد برای واریز شهریه نمایش داده می‌شود. هر کادر را می‌توانید تغییر دهید؛ مقدار فعلی پیش‌نویس شده است.</p>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label className={labelCls}>شماره حساب</label>
-            <input className={inputCls} dir="ltr" value={bankAccount} onChange={(e) => setBankAccount(e.target.value)} placeholder="مثلاً 0103280768005" />
+            <input className={inputCls} dir="ltr" value={bankAccount} onChange={(e) => setBankAccount(e.target.value)} placeholder={tuitionContractMeta.bankAccount} />
+            <p className="mt-1 text-xs text-slate-500">مقدار پیش‌فرض: <span dir="ltr" className="font-semibold text-slate-700">{tuitionContractMeta.bankAccount}</span></p>
           </div>
           <div>
             <label className={labelCls}>نام بانک</label>
-            <input className={inputCls} value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="مثلاً بانک ملی" />
+            <input className={inputCls} value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder={tuitionContractMeta.bankName} />
+            <p className="mt-1 text-xs text-slate-500">مقدار پیش‌فرض: <span className="font-semibold text-slate-700">{tuitionContractMeta.bankName}</span></p>
           </div>
           <div>
             <label className={labelCls}>نام صاحب حساب</label>
-            <input className={inputCls} value={accountHolder} onChange={(e) => setAccountHolder(e.target.value)} placeholder="مثلاً شهرام گیوی" />
+            <input className={inputCls} value={accountHolder} onChange={(e) => setAccountHolder(e.target.value)} placeholder={tuitionContractMeta.accountHolder} />
+            <p className="mt-1 text-xs text-slate-500">مقدار پیش‌فرض: <span className="font-semibold text-slate-700">{tuitionContractMeta.accountHolder}</span></p>
           </div>
           <div>
             <label className={labelCls}>کد ملی صاحب حساب</label>
-            <input className={inputCls} dir="ltr" value={accountNationalId} onChange={(e) => setAccountNationalId(e.target.value)} placeholder="مثلاً 1287021247" />
+            <input className={inputCls} dir="ltr" value={accountNationalId} onChange={(e) => setAccountNationalId(e.target.value)} placeholder={tuitionContractMeta.accountNationalId} />
+            <p className="mt-1 text-xs text-slate-500">مقدار پیش‌فرض: <span dir="ltr" className="font-semibold text-slate-700">{tuitionContractMeta.accountNationalId}</span></p>
           </div>
         </div>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap gap-2">
           <AdminButton onClick={saveBankInfo} disabled={saving}>
             {saving ? 'در حال ذخیره...' : 'ذخیره اطلاعات حساب بانکی'}
+          </AdminButton>
+          <AdminButton variant="secondary" onClick={fillBankDefaults} disabled={saving}>
+            پر کردن با مقادیر پیش‌فرض
           </AdminButton>
         </div>
       </AdminPanel>
