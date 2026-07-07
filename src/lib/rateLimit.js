@@ -5,6 +5,8 @@ const LIMITS = {
   'parent-login': { windowMs: 15 * 60 * 1000, maxAttempts: 8 },
   'parent-forgot': { windowMs: 60 * 60 * 1000, maxAttempts: 6 },
   'pre-register': { windowMs: 60 * 60 * 1000, maxAttempts: 5 },
+  // ارسال کد پیامکی — محافظت از اعتبار پیامک در برابر ارسال مکرر
+  'otp-send': { windowMs: 15 * 60 * 1000, maxAttempts: 5 },
   default: { windowMs: 15 * 60 * 1000, maxAttempts: 10 },
 }
 
