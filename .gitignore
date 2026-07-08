@@ -33,3 +33,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# TLS certificates & private keys — NEVER commit (public repo)
+bartarinandishe.ir_ecc/
+*.key
+*.pem
+*.cer
+*.csr
+
+# SQLite WAL/shadow files
+prisma/dev.db-wal
+prisma/dev.db-shm
+shadow-*.db
