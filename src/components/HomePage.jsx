@@ -11,7 +11,6 @@ import CommentWidget from './CommentWidget'
 import AnnouncementBanner from './AnnouncementBanner'
 import KidDecorations from './KidDecorations'
 import { MusicProvider } from './MusicProvider'
-import { ThemeToggle } from './ui/theme-toggle'
 import { navItems as navItemsDefault } from '../data/navItems'
 
 function scrollToHash(hash) {
@@ -68,11 +67,6 @@ export default function HomePage({ sessionData, announcements = [], cms = {}, si
         </div>
 
         <SiteFooter />
-
-        {/* Theme toggle on homepage — fixed bottom-left */}
-        <div className="fixed bottom-4 left-4 z-40">
-          <ThemeToggle className="shadow-lg" />
-        </div>
 
         <CommentWidget />
       </div>
