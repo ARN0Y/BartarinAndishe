@@ -13,9 +13,13 @@ export const metadata = {
   keywords: ['کودکستان', 'پیش‌دبستانی', 'مهد کودک', 'اصفهان', 'برترین اندیشه', 'ثبت‌نام', 'پیش‌ثبت‌نام'],
   authors: [{ name: 'کودکستان برترین اندیشه' }],
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
-    apple: '/favicon.svg',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-32.png', type: 'image/png', sizes: '32x32' },
+      { url: '/favicon-192.png', type: 'image/png', sizes: '192x192' },
+    ],
+    shortcut: '/favicon-192.png',
+    apple: '/apple-icon.png',
   },
   openGraph: {
     type: 'website',
